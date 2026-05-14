@@ -105,6 +105,18 @@
       box-shadow: 0 0 22px rgba(243, 201, 105, 0.14);
     }
 
+    .site-button.is-back {
+      grid-column: 1 / -1;
+      background: rgba(88, 214, 198, 0.14);
+      border-color: rgba(88, 214, 198, 0.7);
+      color: var(--reef);
+    }
+
+    .site-button.is-back:hover {
+      background: rgba(88, 214, 198, 0.24);
+      border-color: rgba(88, 214, 198, 0.92);
+    }
+
     .site-detail {
       min-height: 86px;
       margin-top: 16px;
@@ -337,14 +349,6 @@
   <div class="legend"><span></span>AMI deployment site</div>
 
   <script>
-    const anguilla = {
-"type": "FeatureCollection",
-"name": "anguilla_boundary",
-"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
-"features": [
-{ "type": "Feature", "properties": { "GID_0": "AIA", "COUNTRY": "Anguilla" }, "geometry": { "type": "MultiPolygon", "coordinates": [ [ [ [ -63.0162097, 18.209107 ], [ -63.0121689, 18.2113994 ], [ -63.0112303, 18.2170165 ], [ -63.0075096, 18.2226571 ], [ -63.0024481, 18.2208678 ], [ -62.9967709, 18.2217881 ], [ -62.9905483, 18.225747 ], [ -62.9853202, 18.2301429 ], [ -62.9847993, 18.2370834 ], [ -62.9808728, 18.2392483 ], [ -62.9803374, 18.2443057 ], [ -62.9848949, 18.2455337 ], [ -62.9858457, 18.2501389 ], [ -62.9808137, 18.2542161 ], [ -62.9754006, 18.2565274 ], [ -62.972299799999988, 18.2612192 ], [ -62.9684491, 18.2659393 ], [ -62.9682922, 18.2731804 ], [ -62.9743614, 18.2696056 ], [ -62.9798439, 18.2651384 ], [ -62.9856949, 18.2633324 ], [ -62.9912224, 18.261764 ], [ -62.995764699999988, 18.2595837 ], [ -63.000676399999989, 18.2570207 ], [ -63.0054546, 18.2603094 ], [ -63.0113683, 18.2597226 ], [ -63.0170562, 18.2551578 ], [ -63.0244048, 18.2560219 ], [ -63.0294907, 18.2562239 ], [ -63.0337497, 18.2538885 ], [ -63.0384722, 18.2523265 ], [ -63.0451002, 18.2504783 ], [ -63.0504169, 18.2476039 ], [ -63.0554332, 18.2454005 ], [ -63.0604069, 18.2414041 ], [ -63.06701, 18.2375507 ], [ -63.0711108, 18.2331505 ], [ -63.069191, 18.2276062 ], [ -63.0678057, 18.2203483 ], [ -63.0712893, 18.2159722 ], [ -63.0757585, 18.2128185 ], [ -63.0789781, 18.209994 ], [ -63.0848608, 18.21 ], [ -63.0899537, 18.2090276 ], [ -63.09247, 18.2044585 ], [ -63.0915336, 18.196831 ], [ -63.0985714, 18.1953774 ], [ -63.1047926, 18.1954172 ], [ -63.1106635, 18.193673 ], [ -63.1164169, 18.1924446 ], [ -63.1218695, 18.1925002 ], [ -63.129051, 18.1915506 ], [ -63.1343221, 18.1894197 ], [ -63.137278599999988, 18.1832974 ], [ -63.1425108, 18.1800001 ], [ -63.1490742, 18.1766033 ], [ -63.1557315, 18.1724627 ], [ -63.1622289, 18.1709591 ], [ -63.1672472, 18.1654864 ], [ -63.1720834, 18.1616917 ], [ -63.165771899999989, 18.1608949 ], [ -63.159782, 18.1629961 ], [ -63.154201, 18.1623089 ], [ -63.1474997, 18.1629203 ], [ -63.1412681, 18.1631943 ], [ -63.138109799999988, 18.1672328 ], [ -63.1388055, 18.1715832 ], [ -63.1314891, 18.1704947 ], [ -63.1253547, 18.1690124 ], [ -63.1207713, 18.1727961 ], [ -63.1166208, 18.1761875 ], [ -63.1121438, 18.1790593 ], [ -63.1064785, 18.1755965 ], [ -63.1046424, 18.1704752 ], [ -63.1009725, 18.1681714 ], [ -63.0961348, 18.1696528 ], [ -63.0893055, 18.1710805 ], [ -63.0830903, 18.1734718 ], [ -63.0769568, 18.1760083 ], [ -63.073114, 18.1821161 ], [ -63.0686983, 18.1863889 ], [ -63.0637018, 18.1873849 ], [ -63.058534, 18.1892132 ], [ -63.0542611, 18.1907021 ], [ -63.0500107, 18.1925323 ], [ -63.045029, 18.1965028 ], [ -63.0390739, 18.1972911 ], [ -63.0353987, 18.2009382 ], [ -63.0311108, 18.2034712 ], [ -63.0258709, 18.2052779 ], [ -63.0206383, 18.2075001 ], [ -63.0162097, 18.209107 ] ] ], [ [ [ -62.9266946, 18.2898403 ], [ -62.9306504, 18.2943823 ], [ -62.9383734, 18.2949203 ], [ -62.944860899999988, 18.2960935 ], [ -62.9493561, 18.2935985 ], [ -62.9574648, 18.288667 ], [ -62.9564658, 18.2829467 ], [ -62.9595344, 18.2770328 ], [ -62.9543521, 18.2753011 ], [ -62.9489722, 18.2786943 ], [ -62.9463566, 18.2837279 ], [ -62.9409256, 18.2845255 ], [ -62.9336179, 18.2855096 ], [ -62.9266946, 18.2898403 ] ] ], [ [ [ -63.1769315, 18.2651254 ], [ -63.1700812, 18.2615571 ], [ -63.1714391, 18.265172 ], [ -63.1769315, 18.2651254 ] ] ], [ [ [ -63.2465471, 18.2746278 ], [ -63.2409723, 18.2775628 ], [ -63.2364434, 18.2823691 ], [ -63.2436864, 18.2817092 ], [ -63.2512499, 18.2838879 ], [ -63.2577657, 18.2838249 ], [ -63.260369, 18.2796919 ], [ -63.2594198, 18.2742894 ], [ -63.253909, 18.2734724 ], [ -63.2465471, 18.2746278 ] ] ], [ [ [ -63.4278434, 18.5902852 ], [ -63.4260419, 18.5858336 ], [ -63.4232168, 18.5917972 ], [ -63.4278434, 18.5902852 ] ] ] ] } }
-]
-};
     const sites = {
   "type": "FeatureCollection",
   "features": [
@@ -522,8 +526,14 @@
     const siteLookup = new Map(pointsOfInterest.map((site) => [site.id, site]));
     const siteFeatureLookup = new Map(sites.features.map((feature) => [feature.properties.id, feature]));
     const countryLookup = new Map(countries.map((country) => [country.id, country]));
-    const siteCenter = [-32.26927070, 34.88163595];
+    const siteCenter = [-32.26834900, 34.92718850];
     const siteFlags = new Map();
+    const globalView = {
+      center: [0, 18],
+      zoom: 1.15,
+      pitch: 0,
+      bearing: 0
+    };
     const globeSpin = {
       enabled: true,
       userInteracting: false,
@@ -536,10 +546,10 @@
 
     const map = new maplibregl.Map({
       container: "map",
-      center: [0, 18],
-      zoom: 1.15,
-      pitch: 0,
-      bearing: 0,
+      center: globalView.center,
+      zoom: globalView.zoom,
+      pitch: globalView.pitch,
+      bearing: globalView.bearing,
       antialias: true,
       hash: false,
       style: {
@@ -554,7 +564,7 @@
               "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png"
             ],
             tileSize: 512,
-            maxzoom: 10,
+            maxzoom: 19,
             attribution: "&copy; OpenStreetMap contributors"
           }
         },
@@ -598,41 +608,7 @@
     });
 
     map.on("load", () => {
-      map.addSource("anguilla", { type: "geojson", data: anguilla });
       map.addSource("sites", { type: "geojson", data: sites });
-
-      map.addLayer({
-        id: "anguilla-glow",
-        type: "line",
-        source: "anguilla",
-        paint: {
-          "line-color": "#58d6c6",
-          "line-width": 8,
-          "line-blur": 6,
-          "line-opacity": 0.45
-        }
-      });
-
-      map.addLayer({
-        id: "anguilla-land",
-        type: "fill",
-        source: "anguilla",
-        paint: {
-          "fill-color": "#73c36f",
-          "fill-opacity": 0.38
-        }
-      });
-
-      map.addLayer({
-        id: "anguilla-coast",
-        type: "line",
-        source: "anguilla",
-        paint: {
-          "line-color": "#f8fbff",
-          "line-width": 1.4,
-          "line-opacity": 0.72
-        }
-      });
 
       map.addLayer({
         id: "site-halo",
@@ -798,6 +774,10 @@
         button.dataset.country = options.countryId;
       }
 
+      if (options.variant) {
+        button.classList.add(`is-${options.variant}`);
+      }
+
       button.addEventListener("click", onClick);
       return button;
     }
@@ -815,11 +795,32 @@
       });
     }
 
+    function returnToGlobalView() {
+      renderCountryButtons();
+      globeSpin.enabled = false;
+      globeSpin.flyToInProgress = true;
+
+      map.once("moveend", () => {
+        globeSpin.enabled = true;
+        startGlobeSpin();
+      });
+
+      map.flyTo({
+        center: globalView.center,
+        zoom: globalView.zoom,
+        pitch: globalView.pitch,
+        bearing: globalView.bearing,
+        speed: 0.72,
+        curve: 1.55,
+        essential: true
+      });
+    }
+
     function renderSiteButtons(countryName) {
       const list = document.getElementById("site-list");
       list.replaceChildren();
 
-      list.appendChild(createHudButton("All countries", renderCountryButtons));
+      list.appendChild(createHudButton("Back to all countries", returnToGlobalView, { variant: "back" }));
 
       pointsOfInterest
         .filter((site) => site.country === countryName)

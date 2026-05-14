@@ -30,7 +30,6 @@ Current deployment sites are:
 |-- index.html
 |-- README.md
 |-- data/
-|   |-- anguilla_boundary.geojson
 |   `-- sites.csv
 |-- scripts/
 |   `-- build_map.R
@@ -44,24 +43,18 @@ Current deployment sites are:
 `index.html`
 
 The standalone web page served by GitHub Pages. It contains the MapLibre setup,
-CSS, embedded site data, embedded Anguilla boundary GeoJSON, and all browser
-interaction code.
+CSS, embedded site data, and all browser interaction code.
 
 `scripts/build_map.R`
 
-The source build script. It reads `data/sites.csv` and
-`data/anguilla_boundary.geojson`, converts the site table to GeoJSON, inserts
-the generated JSON into the HTML template, and writes a fresh `index.html`.
+The source build script. It reads `data/sites.csv`, converts the site table to
+GeoJSON, inserts the generated JSON into the HTML template, and writes a fresh
+`index.html`.
 
 `data/sites.csv`
 
 The editable list of deployment locations, camera settings, descriptions, and
 image credits.
-
-`data/anguilla_boundary.geojson`
-
-The Anguilla boundary layer used to draw the highlighted land and coast on the
-map.
 
 `.github/workflows/pages.yml`
 
@@ -183,9 +176,9 @@ and deployment source to **GitHub Actions**, then re-run the workflow.
 - The map style uses OpenStreetMap raster tiles with subdued styling.
 - Globe projection is enabled with `map.setProjection({ type: "globe" })` when
   supported by the loaded MapLibre version.
-- The Anguilla boundary and site GeoJSON are embedded directly in `index.html`
-  by the R build script. This keeps GitHub Pages deployment simple because there
-  is no runtime data fetch.
+- The site GeoJSON is embedded directly in `index.html` by the R build script.
+  This keeps GitHub Pages deployment simple because there is no runtime data
+  fetch.
 - The initial globe rotation stops when the user interacts with the map or when
   the map zooms in beyond the configured spin threshold.
 - The site detail panel uses externally hosted, credited images. If an external
@@ -196,7 +189,7 @@ and deployment source to **GitHub Actions**, then re-run the workflow.
 
 Before pushing changes:
 
-1. Update `data/sites.csv` or `data/anguilla_boundary.geojson` as needed.
+1. Update `data/sites.csv` as needed.
 2. Run `Rscript .\scripts\build_map.R`.
 3. Confirm `index.html` changed as expected.
 4. Preview the site locally.

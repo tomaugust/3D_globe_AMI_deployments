@@ -31,21 +31,9 @@ sites_sf <- st_as_sf(
   remove = FALSE
 )
 
-anguilla <- st_read(
-  file.path(data_dir, "anguilla_boundary.geojson"),
-  quiet = TRUE
-) |>
-  st_transform(4326) |>
-  st_make_valid()
-
-map_bbox <- st_bbox(st_union(st_geometry(anguilla), st_geometry(sites_sf)))
+map_bbox <- st_bbox(st_geometry(sites_sf))
 center_lon <- mean(c(map_bbox[["xmin"]], map_bbox[["xmax"]]))
 center_lat <- mean(c(map_bbox[["ymin"]], map_bbox[["ymax"]]))
-
-anguilla_geojson <- paste(
-  readLines(file.path(data_dir, "anguilla_boundary.geojson"), warn = FALSE),
-  collapse = "\n"
-)
 
 site_features <- sites |>
   rowwise() |>
@@ -233,6 +221,18 @@ html <-
       background: rgba(243, 201, 105, 0.18);
       border-color: rgba(243, 201, 105, 0.7);
       box-shadow: 0 0 22px rgba(243, 201, 105, 0.14);
+    }
+
+    .site-button.is-back {
+      grid-column: 1 / -1;
+      background: rgba(88, 214, 198, 0.14);
+      border-color: rgba(88, 214, 198, 0.7);
+      color: var(--reef);
+    }
+
+    .site-button.is-back:hover {
+      background: rgba(88, 214, 198, 0.24);
+      border-color: rgba(88, 214, 198, 0.92);
     }
 
     .site-detail {
@@ -467,7 +467,6 @@ html <-
   <div class="legend"><span></span>AMI deployment site</div>
 
   <script>
-    const anguilla = __ANGUILLA_GEOJSON__;
     const sites = __SITES_GEOJSON__;
     const pointsOfInterest = __POI_SITES__;
     const countries = __COUNTRY_VIEWS__;
@@ -476,6 +475,12 @@ html <-
     const countryLookup = new Map(countries.map((country) => [country.id, country]));
     const siteCenter = [__CENTER_LON__, __CENTER_LAT__];
     const siteFlags = new Map();
+    const globalView = {
+      center: [0, 18],
+      zoom: 1.15,
+      pitch: 0,
+      bearing: 0
+    };
     const globeSpin = {
       enabled: true,
       userInteracting: false,
@@ -488,10 +493,10 @@ html <-
 
     const map = new maplibregl.Map({
       container: "map",
-      center: [0, 18],
-      zoom: 1.15,
-      pitch: 0,
-      bearing: 0,
+      center: globalView.center,
+      zoom: globalView.zoom,
+      pitch: globalView.pitch,
+      bearing: globalView.bearing,
       antialias: true,
       hash: false,
       style: {
@@ -506,7 +511,7 @@ html <-
               "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png"
             ],
             tileSize: 512,
-            maxzoom: 10,
+            maxzoom: 19,
             attribution: "&copy; OpenStreetMap contributors"
           }
         },
@@ -550,41 +555,7 @@ html <-
     });
 
     map.on("load", () => {
-      map.addSource("anguilla", { type: "geojson", data: anguilla });
       map.addSource("sites", { type: "geojson", data: sites });
-
-      map.addLayer({
-        id: "anguilla-glow",
-        type: "line",
-        source: "anguilla",
-        paint: {
-          "line-color": "#58d6c6",
-          "line-width": 8,
-          "line-blur": 6,
-          "line-opacity": 0.45
-        }
-      });
-
-      map.addLayer({
-        id: "anguilla-land",
-        type: "fill",
-        source: "anguilla",
-        paint: {
-          "fill-color": "#73c36f",
-          "fill-opacity": 0.38
-        }
-      });
-
-      map.addLayer({
-        id: "anguilla-coast",
-        type: "line",
-        source: "anguilla",
-        paint: {
-          "line-color": "#f8fbff",
-          "line-width": 1.4,
-          "line-opacity": 0.72
-        }
-      });
 
       map.addLayer({
         id: "site-halo",
@@ -750,6 +721,10 @@ html <-
         button.dataset.country = options.countryId;
       }
 
+      if (options.variant) {
+        button.classList.add(`is-${options.variant}`);
+      }
+
       button.addEventListener("click", onClick);
       return button;
     }
@@ -767,11 +742,32 @@ html <-
       });
     }
 
+    function returnToGlobalView() {
+      renderCountryButtons();
+      globeSpin.enabled = false;
+      globeSpin.flyToInProgress = true;
+
+      map.once("moveend", () => {
+        globeSpin.enabled = true;
+        startGlobeSpin();
+      });
+
+      map.flyTo({
+        center: globalView.center,
+        zoom: globalView.zoom,
+        pitch: globalView.pitch,
+        bearing: globalView.bearing,
+        speed: 0.72,
+        curve: 1.55,
+        essential: true
+      });
+    }
+
     function renderSiteButtons(countryName) {
       const list = document.getElementById("site-list");
       list.replaceChildren();
 
-      list.appendChild(createHudButton("All countries", renderCountryButtons));
+      list.appendChild(createHudButton("Back to all countries", returnToGlobalView, { variant: "back" }));
 
       pointsOfInterest
         .filter((site) => site.country === countryName)
@@ -911,7 +907,6 @@ html <-
 </body>
 </html>'
 
-html <- gsub("__ANGUILLA_GEOJSON__", anguilla_geojson, html, fixed = TRUE)
 html <- gsub("__SITES_GEOJSON__", sites_geojson, html, fixed = TRUE)
 html <- gsub("__POI_SITES__", poi_sites_json, html, fixed = TRUE)
 html <- gsub("__COUNTRY_VIEWS__", country_views_json, html, fixed = TRUE)

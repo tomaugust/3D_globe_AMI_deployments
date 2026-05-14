@@ -526,9 +526,11 @@ html <-
             type: "raster",
             source: "osm",
             paint: {
-              "raster-opacity": 0.34,
-              "raster-saturation": -0.72,
-              "raster-contrast": 0.18
+              "raster-opacity": 0.62,
+              "raster-saturation": -0.35,
+              "raster-contrast": 0.08,
+              "raster-brightness-min": 0.08,
+              "raster-brightness-max": 0.92
             }
           }
         ]

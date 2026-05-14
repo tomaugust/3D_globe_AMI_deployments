@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Anguilla AMI Sites - Interactive 3D Map</title>
   <link href="https://unpkg.com/maplibre-gl@5.3.0/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/maplibre-gl@5.3.0/dist/maplibre-gl.js"></script>
   <style>
     :root {
@@ -30,6 +31,185 @@
     #map {
       position: absolute;
       inset: 0;
+    }
+
+    .world-title {
+      position: absolute;
+      left: 50%;
+      top: 48%;
+      z-index: 2;
+      width: min(760px, calc(100vw - 48px));
+      color: var(--ink);
+      text-align: center;
+      text-shadow: 0 4px 24px rgba(0, 0, 0, 0.72), 0 1px 1px rgba(0, 0, 0, 0.8);
+      pointer-events: none;
+      opacity: 0;
+      transform: translate(-50%, -50%) translateY(12px);
+      transition: opacity 520ms ease, transform 520ms ease;
+    }
+
+    .world-title.is-visible {
+      opacity: 1;
+      transform: translate(-50%, -50%) translateY(0);
+    }
+
+    .world-title h2 {
+      margin: 0;
+      color: #ffffff;
+      font-family: "Great Vibes", "Brush Script MT", cursive;
+      font-size: clamp(70px, 11vw, 150px);
+      font-weight: 400;
+      line-height: 0.82;
+    }
+
+    .world-title p {
+      margin: 16px 0 0;
+      color: #ffffff;
+      font-size: clamp(15px, 2.1vw, 25px);
+      font-weight: 400;
+      line-height: 1.25;
+      text-wrap: balance;
+    }
+
+    .about-link {
+      position: absolute;
+      top: 18px;
+      right: 78px;
+      z-index: 4;
+      border: 0;
+      background: transparent;
+      color: rgba(248, 251, 255, 0.62);
+      font: inherit;
+      font-size: 13px;
+      line-height: 1.2;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      cursor: pointer;
+    }
+
+    .about-link:hover {
+      color: #ffffff;
+    }
+
+    .about-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 6;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 28px;
+      background: rgba(4, 10, 15, 0.62);
+      backdrop-filter: blur(8px);
+      box-sizing: border-box;
+    }
+
+    .about-overlay.is-visible {
+      display: flex;
+    }
+
+    .about-panel {
+      width: min(720px, calc(100vw - 56px));
+      max-height: min(760px, calc(100vh - 56px));
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 8px;
+      background: linear-gradient(145deg, rgba(8, 22, 34, 0.97), rgba(6, 14, 22, 0.92));
+      color: var(--ink);
+      box-shadow: 0 28px 90px rgba(0, 0, 0, 0.52);
+      overflow-y: auto;
+    }
+
+    .about-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 20px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .about-header h2 {
+      margin: 0;
+      color: #ffffff;
+      font-size: 24px;
+      line-height: 1.15;
+    }
+
+    .about-close {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+      width: 34px;
+      height: 34px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--ink);
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .about-close:hover {
+      border-color: rgba(243, 201, 105, 0.5);
+      color: var(--gold);
+    }
+
+    .about-content {
+      padding: 18px 20px 20px;
+    }
+
+    .about-content p {
+      margin: 0 0 14px;
+      color: rgba(248, 251, 255, 0.82);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .about-content h3 {
+      margin: 18px 0 8px;
+      color: #ffffff;
+      font-size: 14px;
+      line-height: 1.25;
+      text-transform: uppercase;
+    }
+
+    .about-links {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .about-logo-link {
+      min-width: 0;
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--ink);
+      text-decoration: none;
+    }
+
+    .about-logo-link strong {
+      display: block;
+      color: #ffffff;
+      font-size: 15px;
+      line-height: 1.15;
+    }
+
+    .about-logo-link span {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    .about-logo-link:hover {
+      border-color: rgba(243, 201, 105, 0.5);
+      color: var(--gold);
     }
 
     .hud {
@@ -294,6 +474,157 @@
       line-height: 1.25;
     }
 
+    .gallery-trigger {
+      position: absolute;
+      left: 50%;
+      top: 58%;
+      z-index: 3;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 136px;
+      min-height: 42px;
+      padding: 10px 16px;
+      border: 1px solid rgba(243, 201, 105, 0.68);
+      border-radius: 8px;
+      background: linear-gradient(145deg, rgba(243, 201, 105, 0.96), rgba(88, 214, 198, 0.9));
+      color: #07111a;
+      font-size: 12px;
+      font-weight: 850;
+      letter-spacing: 0;
+      text-transform: uppercase;
+      box-shadow: 0 18px 42px rgba(0, 0, 0, 0.32);
+      cursor: pointer;
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, -50%) translateY(14px);
+      transition: opacity 240ms ease, transform 240ms ease;
+    }
+
+    .gallery-trigger.is-visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translate(-50%, -50%) translateY(0);
+    }
+
+    .gallery-trigger:hover {
+      transform: translate(-50%, -50%) translateY(-2px);
+    }
+
+    .gallery-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 28px;
+      background: rgba(4, 10, 15, 0.62);
+      backdrop-filter: blur(8px);
+      box-sizing: border-box;
+    }
+
+    .gallery-overlay.is-visible {
+      display: flex;
+    }
+
+    .gallery-panel {
+      width: min(860px, calc(100vw - 56px));
+      max-height: min(720px, calc(100vh - 56px));
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 8px;
+      background: linear-gradient(145deg, rgba(8, 22, 34, 0.96), rgba(6, 14, 22, 0.9));
+      color: var(--ink);
+      box-shadow: 0 28px 90px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+    }
+
+    .gallery-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 15px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .gallery-header h2 {
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.2;
+    }
+
+    .gallery-close {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--ink);
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .gallery-close:hover {
+      border-color: rgba(243, 201, 105, 0.5);
+      color: var(--gold);
+    }
+
+    .gallery-carousel {
+      position: relative;
+      display: grid;
+      grid-template-columns: 52px minmax(0, 1fr) 52px;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+    }
+
+    .gallery-image-frame {
+      min-width: 0;
+    }
+
+    .gallery-image-frame img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      max-height: calc(100vh - 170px);
+      border-radius: 8px;
+      object-fit: cover;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .gallery-arrow {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--ink);
+      font-size: 28px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .gallery-arrow:hover {
+      border-color: rgba(243, 201, 105, 0.55);
+      color: var(--gold);
+      background: rgba(243, 201, 105, 0.12);
+    }
+
+    .gallery-counter {
+      margin: 0 0 16px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
     .legend {
       position: absolute;
       right: 26px;
@@ -358,6 +689,36 @@
         font-size: 23px;
       }
 
+      .world-title {
+        top: 54%;
+      }
+
+      .world-title h2 {
+        font-size: clamp(56px, 18vw, 92px);
+      }
+
+      .world-title p {
+        font-size: 15px;
+      }
+
+      .about-link {
+        right: 16px;
+        top: 15px;
+      }
+
+      .about-overlay {
+        padding: 14px;
+      }
+
+      .about-panel {
+        width: calc(100vw - 28px);
+        max-height: calc(100vh - 28px);
+      }
+
+      .about-links {
+        grid-template-columns: 1fr;
+      }
+
       .site-list {
         grid-template-columns: 1fr;
       }
@@ -367,11 +728,74 @@
         right: auto;
         bottom: 18px;
       }
+
+      .gallery-trigger {
+        top: 62%;
+      }
+
+      .gallery-overlay {
+        padding: 14px;
+      }
+
+      .gallery-panel {
+        width: calc(100vw - 28px);
+        max-height: calc(100vh - 28px);
+      }
+
+      .gallery-carousel {
+        grid-template-columns: 42px minmax(0, 1fr) 42px;
+        gap: 8px;
+        padding: 12px;
+      }
+
+      .gallery-arrow {
+        width: 38px;
+        height: 38px;
+        font-size: 24px;
+      }
     }
   </style>
 </head>
 <body>
   <div id="map"></div>
+  <section class="world-title is-visible" id="world-title" aria-label="Global introduction">
+    <h2>Be Inspired</h2>
+    <p>Explore insect monitoring stations around the world</p>
+  </section>
+  <button class="about-link" id="about-link" type="button">About</button>
+  <div class="about-overlay" id="about-overlay" role="dialog" aria-modal="true" aria-labelledby="about-title">
+    <section class="about-panel">
+      <div class="about-header">
+        <h2 id="about-title">About INSPIRE</h2>
+        <button class="about-close" id="about-close" type="button" aria-label="Close about panel">&times;</button>
+      </div>
+      <div class="about-content">
+        <p>INSPIRE explores how new technology and citizen science can help people understand and protect insects around the world. Insects pollinate crops, recycle nutrients, feed wildlife, and give early warnings about environmental change, but we still know far too little about how many insect populations are changing.</p>
+        <p>The project brings together AI-assisted camera systems for nocturnal insects with inclusive ways for people to contribute observations. By combining automated monitoring with community science, INSPIRE aims to create better evidence for conservation while helping more people connect with nature.</p>
+        <p>This globe highlights monitoring stations and partner locations in an emerging international network. The ambition is to support local and global biodiversity assessments, share open data, and make insect monitoring more visible, accessible, and useful. INSPIRE is supported by the Aberdeen Charitable Foundation.</p>
+
+        <h3>Find Out More</h3>
+        <div class="about-links">
+          <a class="about-logo-link" href="https://www.ceh.ac.uk/" target="_blank" rel="noopener">
+            <strong>UKCEH</strong>
+            <span>UK Centre for Ecology &amp; Hydrology</span>
+          </a>
+          <a class="about-logo-link" href="https://www.aberdeenplc.com/en-gb/news-and-insights/a-new-partnership-to-protect-insect-populations" target="_blank" rel="noopener">
+            <strong>Aberdeen Charitable Foundation</strong>
+            <span>Project funder and partner</span>
+          </a>
+          <a class="about-logo-link" href="https://ukpoms.org.uk/" target="_blank" rel="noopener">
+            <strong>UK PoMS</strong>
+            <span>UK Pollinator Monitoring Scheme</span>
+          </a>
+          <a class="about-logo-link" href="https://butterfly-monitoring.net/" target="_blank" rel="noopener">
+            <strong>Butterfly Monitoring</strong>
+            <span>International butterfly monitoring networks</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </div>
 
   <section class="hud" aria-label="Map controls">
     <p class="eyebrow">Anguilla AMI survey</p>
@@ -392,6 +816,23 @@
   </section>
 
   <div class="legend"><span></span>AMI deployment site</div>
+  <button class="gallery-trigger" id="gallery-trigger" type="button">View Gallery</button>
+  <div class="gallery-overlay" id="gallery-overlay" role="dialog" aria-modal="true" aria-labelledby="gallery-title">
+    <section class="gallery-panel">
+      <div class="gallery-header">
+        <h2 id="gallery-title">Site gallery</h2>
+        <button class="gallery-close" id="gallery-close" type="button" aria-label="Close gallery">&times;</button>
+      </div>
+      <div class="gallery-carousel">
+        <button class="gallery-arrow" id="gallery-prev" type="button" aria-label="Previous gallery image">&lsaquo;</button>
+        <div class="gallery-image-frame">
+          <img id="gallery-image" alt="">
+        </div>
+        <button class="gallery-arrow" id="gallery-next" type="button" aria-label="Next gallery image">&rsaquo;</button>
+      </div>
+      <p class="gallery-counter" id="gallery-counter"></p>
+    </section>
+  </div>
 
   <script>
     const sites = {
@@ -414,9 +855,10 @@
         "number_of_images": 38000,
         "number_of_detections": 360000,
         "setting": "Main island reserve site",
-        "photo_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Color_Enhanced_Cavern_DCEN-4.jpg?width=640",
+        "photo_url": "data/images/anguilla/fountain-reserve/photo.jpg",
         "photo_credit": "Representative cavern image: Shadowmeld Photography, CC BY-SA 3.0",
-        "photo_link": "https://commons.wikimedia.org/wiki/File:Color_Enhanced_Cavern_DCEN-4.jpg"
+        "photo_link": "https://commons.wikimedia.org/wiki/File:Color_Enhanced_Cavern_DCEN-4.jpg",
+        "gallery_images": ["data/images/anguilla/fountain-reserve/gallery/moth-01.png", "data/images/anguilla/fountain-reserve/gallery/moth-02.png", "data/images/anguilla/fountain-reserve/gallery/moth-03.png"]
       }
     },
     {
@@ -436,9 +878,10 @@
         "number_of_images": 54000,
         "number_of_detections": 520000,
         "setting": "Offshore cay deployment",
-        "photo_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Anguilla_Prickly-Pear.jpg?width=640",
+        "photo_url": "data/images/anguilla/prickly-pear-cay/photo.jpg",
         "photo_credit": "Laurent Michelet, CC BY-SA 3.0 / GFDL",
-        "photo_link": "https://commons.wikimedia.org/wiki/File:Anguilla_Prickly-Pear.jpg"
+        "photo_link": "https://commons.wikimedia.org/wiki/File:Anguilla_Prickly-Pear.jpg",
+        "gallery_images": ["data/images/anguilla/prickly-pear-cay/gallery/moth-01.png", "data/images/anguilla/prickly-pear-cay/gallery/moth-02.png", "data/images/anguilla/prickly-pear-cay/gallery/moth-03.png"]
       }
     },
     {
@@ -458,9 +901,10 @@
         "number_of_images": 78000,
         "number_of_detections": 740000,
         "setting": "Remote island deployment",
-        "photo_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Dog_Island_Aguilla_Landsat.jpg?width=640",
+        "photo_url": "data/images/anguilla/dog-island/photo.jpg",
         "photo_credit": "NASA Landsat 7, public domain",
-        "photo_link": "https://commons.wikimedia.org/wiki/File:Dog_Island_Aguilla_Landsat.jpg"
+        "photo_link": "https://commons.wikimedia.org/wiki/File:Dog_Island_Aguilla_Landsat.jpg",
+        "gallery_images": ["data/images/anguilla/dog-island/gallery/moth-01.png", "data/images/anguilla/dog-island/gallery/moth-02.png", "data/images/anguilla/dog-island/gallery/moth-03.png"]
       }
     },
     {
@@ -480,9 +924,10 @@
         "number_of_images": 96000,
         "number_of_detections": 910000,
         "setting": "Northern offshore deployment",
-        "photo_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Sombrero_Island,_part_of_Anguilla_-_panoramio.jpg?width=640",
+        "photo_url": "data/images/anguilla/sombrero-island/photo.jpg",
         "photo_credit": "David Broad, CC BY 3.0",
-        "photo_link": "https://commons.wikimedia.org/wiki/File:Sombrero_Island,_part_of_Anguilla_-_panoramio.jpg"
+        "photo_link": "https://commons.wikimedia.org/wiki/File:Sombrero_Island,_part_of_Anguilla_-_panoramio.jpg",
+        "gallery_images": ["data/images/anguilla/sombrero-island/gallery/moth-01.png", "data/images/anguilla/sombrero-island/gallery/moth-02.png", "data/images/anguilla/sombrero-island/gallery/moth-03.png"]
       }
     },
     {
@@ -502,9 +947,10 @@
         "number_of_images": 18000,
         "number_of_detections": 240000,
         "setting": "UKCEH headquarters and project coordination site at the Maclean Building, Crowmarsh Gifford",
-        "photo_url": "https://www.ceh.ac.uk/sites/default/files/styles/large/public/2023-02/TILE_Wallingford_hq_entrance_2022_740x548.jpg?itok=kqJEbg4D",
+        "photo_url": "data/images/united-kingdom/ukceh-wallingford/photo.jpg",
         "photo_credit": "Main entrance image: UK Centre for Ecology & Hydrology",
-        "photo_link": "https://www.ceh.ac.uk/careers/our-sites-wallingford"
+        "photo_link": "https://www.ceh.ac.uk/careers/our-sites-wallingford",
+        "gallery_images": ["data/images/united-kingdom/ukceh-wallingford/gallery/moth-01.png", "data/images/united-kingdom/ukceh-wallingford/gallery/moth-02.png", "data/images/united-kingdom/ukceh-wallingford/gallery/moth-03.png"]
       }
     },
     {
@@ -524,9 +970,10 @@
         "number_of_images": 64000,
         "number_of_detections": 620000,
         "setting": "Dummy cloud forest AMI deployment site",
-        "photo_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Monteverde_cloud_forest.jpg?width=640",
-        "photo_credit": "Representative image: Wikimedia Commons",
-        "photo_link": "https://commons.wikimedia.org/wiki/File:Monteverde_cloud_forest.jpg"
+        "photo_url": "data/images/costa-rica/monteverde-cloud-forest/photo.jpg",
+        "photo_credit": "Cephas, CC BY-SA 4.0",
+        "photo_link": "https://commons.wikimedia.org/wiki/File:Monteverde_Cloud_Forest_02.jpg",
+        "gallery_images": ["data/images/costa-rica/monteverde-cloud-forest/gallery/moth-01.png", "data/images/costa-rica/monteverde-cloud-forest/gallery/moth-02.png", "data/images/costa-rica/monteverde-cloud-forest/gallery/moth-03.png"]
       }
     },
     {
@@ -546,9 +993,10 @@
         "number_of_images": 88000,
         "number_of_detections": 840000,
         "setting": "Dummy Caribbean lowland forest AMI deployment site",
-        "photo_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Tortuguero_Canal.jpg?width=640",
-        "photo_credit": "Representative image: Wikimedia Commons",
-        "photo_link": "https://commons.wikimedia.org/wiki/File:Tortuguero_Canal.jpg"
+        "photo_url": "data/images/costa-rica/tortuguero-lowland-forest/photo.jpg",
+        "photo_credit": "Lars0001, Wikimedia Commons",
+        "photo_link": "https://commons.wikimedia.org/wiki/File:Tortuguero_boat_trip.JPG",
+        "gallery_images": ["data/images/costa-rica/tortuguero-lowland-forest/gallery/moth-01.png", "data/images/costa-rica/tortuguero-lowland-forest/gallery/moth-02.png", "data/images/costa-rica/tortuguero-lowland-forest/gallery/moth-03.png"]
       }
     },
     {
@@ -568,9 +1016,10 @@
         "number_of_images": 93000,
         "number_of_detections": 880000,
         "setting": "Dummy Pacific rainforest AMI deployment site",
-        "photo_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Corcovado_National_Park_Costa_Rica.jpg?width=640",
-        "photo_credit": "Representative image: Wikimedia Commons",
-        "photo_link": "https://commons.wikimedia.org/wiki/File:Corcovado_National_Park_Costa_Rica.jpg"
+        "photo_url": "data/images/costa-rica/osa-peninsula-rainforest/photo.jpg",
+        "photo_credit": "Wikimedia Commons, CC0",
+        "photo_link": "https://commons.wikimedia.org/wiki/File:Corcovado_National_Park%2C_Costa_RIca_02.jpg",
+        "gallery_images": ["data/images/costa-rica/osa-peninsula-rainforest/gallery/moth-01.png", "data/images/costa-rica/osa-peninsula-rainforest/gallery/moth-02.png", "data/images/costa-rica/osa-peninsula-rainforest/gallery/moth-03.png"]
       }
     },
     {
@@ -590,9 +1039,10 @@
         "number_of_images": 71000,
         "number_of_detections": 690000,
         "setting": "Dummy biological station AMI deployment site",
-        "photo_url": "https://commons.wikimedia.org/wiki/Special:FilePath/La_Selva_Biological_Station.jpg?width=640",
-        "photo_credit": "Representative image: Wikimedia Commons",
-        "photo_link": "https://commons.wikimedia.org/wiki/File:La_Selva_Biological_Station.jpg"
+        "photo_url": "data/images/costa-rica/la-selva-biological-station/photo.jpg",
+        "photo_credit": "Jimfbleak at English Wikipedia, CC BY-SA 3.0",
+        "photo_link": "https://commons.wikimedia.org/wiki/File:Laselva1.jpg",
+        "gallery_images": ["data/images/costa-rica/la-selva-biological-station/gallery/moth-01.png", "data/images/costa-rica/la-selva-biological-station/gallery/moth-02.png", "data/images/costa-rica/la-selva-biological-station/gallery/moth-03.png"]
       }
     },
     {
@@ -612,9 +1062,10 @@
         "number_of_images": 46000,
         "number_of_detections": 430000,
         "setting": "Dummy tropical dry forest AMI deployment site",
-        "photo_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Guanacaste_Dry_Forest.jpg?width=640",
-        "photo_credit": "Representative image: Wikimedia Commons",
-        "photo_link": "https://commons.wikimedia.org/wiki/File:Guanacaste_Dry_Forest.jpg"
+        "photo_url": "data/images/costa-rica/guanacaste-dry-forest/photo.jpg",
+        "photo_credit": "Wikimedia Commons",
+        "photo_link": "https://commons.wikimedia.org/wiki/File:Guanacaste_National_Park.jpg",
+        "gallery_images": ["data/images/costa-rica/guanacaste-dry-forest/gallery/moth-01.png", "data/images/costa-rica/guanacaste-dry-forest/gallery/moth-02.png", "data/images/costa-rica/guanacaste-dry-forest/gallery/moth-03.png"]
       }
     },
     {
@@ -634,9 +1085,10 @@
         "number_of_images": 59000,
         "number_of_detections": 560000,
         "setting": "Dummy northern Thailand forest-edge AMI deployment site",
-        "photo_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Doi_Suthep-Pui_National_Park.jpg?width=640",
+        "photo_url": "data/images/thailand/chiang-mai-forest-edge/photo.jpg",
         "photo_credit": "Representative image: Wikimedia Commons",
-        "photo_link": "https://commons.wikimedia.org/wiki/File:Doi_Suthep-Pui_National_Park.jpg"
+        "photo_link": "https://commons.wikimedia.org/wiki/File:Doi_Suthep-Pui_National_Park.jpg",
+        "gallery_images": ["data/images/thailand/chiang-mai-forest-edge/gallery/moth-01.png", "data/images/thailand/chiang-mai-forest-edge/gallery/moth-02.png", "data/images/thailand/chiang-mai-forest-edge/gallery/moth-03.png"]
       }
     },
     {
@@ -656,9 +1108,10 @@
         "number_of_images": 86000,
         "number_of_detections": 820000,
         "setting": "Dummy evergreen forest AMI deployment site",
-        "photo_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Khao_Yai_National_Park_Thailand.jpg?width=640",
-        "photo_credit": "Representative image: Wikimedia Commons",
-        "photo_link": "https://commons.wikimedia.org/wiki/File:Khao_Yai_National_Park_Thailand.jpg"
+        "photo_url": "data/images/thailand/khao-yai-evergreen-forest/photo.jpg",
+        "photo_credit": "Kawpodmd, CC BY-SA 3.0 / GFDL",
+        "photo_link": "https://commons.wikimedia.org/wiki/File:Khao_Yai_National_Park.jpg",
+        "gallery_images": ["data/images/thailand/khao-yai-evergreen-forest/gallery/moth-01.png", "data/images/thailand/khao-yai-evergreen-forest/gallery/moth-02.png", "data/images/thailand/khao-yai-evergreen-forest/gallery/moth-03.png"]
       }
     },
     {
@@ -678,9 +1131,10 @@
         "number_of_images": 82000,
         "number_of_detections": 790000,
         "setting": "Dummy western forest complex AMI deployment site",
-        "photo_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Kaeng_Krachan_National_Park.jpg?width=640",
-        "photo_credit": "Representative image: Wikimedia Commons",
-        "photo_link": "https://commons.wikimedia.org/wiki/File:Kaeng_Krachan_National_Park.jpg"
+        "photo_url": "data/images/thailand/kaeng-krachan-forest/photo.jpg",
+        "photo_credit": "JJ Harrison, Wikimedia Commons",
+        "photo_link": "https://commons.wikimedia.org/wiki/File:Kaeng_Krachan.jpg",
+        "gallery_images": ["data/images/thailand/kaeng-krachan-forest/gallery/moth-01.png", "data/images/thailand/kaeng-krachan-forest/gallery/moth-02.png", "data/images/thailand/kaeng-krachan-forest/gallery/moth-03.png"]
       }
     },
     {
@@ -700,9 +1154,10 @@
         "number_of_images": 32000,
         "number_of_detections": 310000,
         "setting": "Dummy Tokyo urban green-space AMI deployment site",
-        "photo_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Shinjuku_Gyoen_National_Garden.jpg?width=640",
+        "photo_url": "data/images/japan/shinjuku-urban-park/photo.jpg",
         "photo_credit": "Representative image: Wikimedia Commons",
-        "photo_link": "https://commons.wikimedia.org/wiki/File:Shinjuku_Gyoen_National_Garden.jpg"
+        "photo_link": "https://commons.wikimedia.org/wiki/File:Shinjuku_Gyoen_National_Garden.jpg",
+        "gallery_images": ["data/images/japan/shinjuku-urban-park/gallery/moth-01.png", "data/images/japan/shinjuku-urban-park/gallery/moth-02.png", "data/images/japan/shinjuku-urban-park/gallery/moth-03.png"]
       }
     },
     {
@@ -722,9 +1177,10 @@
         "number_of_images": 26000,
         "number_of_detections": 280000,
         "setting": "Dummy Tokyo park AMI deployment site",
-        "photo_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Ueno_Park_Tokyo.jpg?width=640",
-        "photo_credit": "Representative image: Wikimedia Commons",
-        "photo_link": "https://commons.wikimedia.org/wiki/File:Ueno_Park_Tokyo.jpg"
+        "photo_url": "data/images/japan/ueno-urban-park/photo.jpg",
+        "photo_credit": "Bernard Gagnon, Wikimedia Commons",
+        "photo_link": "https://commons.wikimedia.org/wiki/File:Ueno_park.jpg",
+        "gallery_images": ["data/images/japan/ueno-urban-park/gallery/moth-01.png", "data/images/japan/ueno-urban-park/gallery/moth-02.png", "data/images/japan/ueno-urban-park/gallery/moth-03.png"]
       }
     }
   ]
@@ -917,9 +1373,9 @@
     "label": "Thailand",
     "longitude": 100.1465,
     "latitude": 15.823,
-    "zoom": 2.2,
-    "pitch": 52,
-    "bearing": -8,
+    "zoom": 4.8,
+    "pitch": 42,
+    "bearing": 0,
     "site_count": 3
   },
   {
@@ -938,6 +1394,9 @@
     const countryLookup = new Map(countries.map((country) => [country.id, country]));
     const siteCenter = [27.07750000, 30.06768850];
     const siteFlags = new Map();
+    let activeSiteFeature = null;
+    let activeGalleryImages = [];
+    let activeGalleryIndex = 0;
     const globalView = {
       center: [0, 18],
       zoom: 1.15,
@@ -1135,6 +1594,92 @@
       });
     }
 
+    function showGalleryTrigger(feature) {
+      const trigger = document.getElementById("gallery-trigger");
+      const hasGallery = Array.isArray(feature.properties.gallery_images) && feature.properties.gallery_images.length > 0;
+      activeSiteFeature = feature;
+      trigger.classList.toggle("is-visible", hasGallery);
+    }
+
+    function hideGalleryTrigger() {
+      document.getElementById("gallery-trigger").classList.remove("is-visible");
+      closeGallery();
+    }
+
+    function clearActiveSiteGallery() {
+      activeSiteFeature = null;
+      hideGalleryTrigger();
+    }
+
+    function openGallery() {
+      if (!activeSiteFeature) {
+        return;
+      }
+
+      const images = activeSiteFeature.properties.gallery_images || [];
+      if (!images.length) {
+        return;
+      }
+
+      const overlay = document.getElementById("gallery-overlay");
+      const title = document.getElementById("gallery-title");
+
+      title.textContent = `${activeSiteFeature.properties.site} gallery`;
+      activeGalleryImages = images;
+      activeGalleryIndex = 0;
+      renderGalleryImage();
+
+      overlay.classList.add("is-visible");
+    }
+
+    function closeGallery() {
+      const overlay = document.getElementById("gallery-overlay");
+      if (overlay) {
+        overlay.classList.remove("is-visible");
+      }
+    }
+
+    function openAbout() {
+      document.getElementById("about-overlay").classList.add("is-visible");
+    }
+
+    function closeAbout() {
+      document.getElementById("about-overlay").classList.remove("is-visible");
+    }
+
+    function showWorldTitle() {
+      document.getElementById("world-title").classList.add("is-visible");
+    }
+
+    function hideWorldTitle() {
+      document.getElementById("world-title").classList.remove("is-visible");
+    }
+
+    function renderGalleryImage() {
+      const image = document.getElementById("gallery-image");
+      const counter = document.getElementById("gallery-counter");
+
+      if (!activeGalleryImages.length) {
+        image.removeAttribute("src");
+        image.alt = "";
+        counter.textContent = "";
+        return;
+      }
+
+      image.src = activeGalleryImages[activeGalleryIndex];
+      image.alt = `${activeSiteFeature.properties.site} gallery image ${activeGalleryIndex + 1}`;
+      counter.textContent = `${activeGalleryIndex + 1} / ${activeGalleryImages.length}`;
+    }
+
+    function stepGallery(direction) {
+      if (!activeGalleryImages.length) {
+        return;
+      }
+
+      activeGalleryIndex = (activeGalleryIndex + direction + activeGalleryImages.length) % activeGalleryImages.length;
+      renderGalleryImage();
+    }
+
     function formatMetric(value) {
       return Number(value).toLocaleString();
     }
@@ -1147,7 +1692,6 @@
           <div class="site-flag-body">
             <div class="site-flag-card">
               <strong>${feature.properties.site}</strong>
-              <span>${feature.properties.setting}</span>
             </div>
           </div>
         `;
@@ -1162,21 +1706,28 @@
           .setLngLat(feature.geometry.coordinates)
           .addTo(map);
 
-        siteFlags.set(feature.properties.site, { marker, element });
+        siteFlags.set(feature.properties.id, { marker, element, feature });
       });
     }
 
     function showSiteFlag(feature) {
-      const siteName = feature.properties.site;
+      const siteId = feature.properties.id;
 
-      siteFlags.forEach(({ element }, name) => {
-        element.classList.toggle("is-visible", name === siteName);
+      siteFlags.forEach(({ element }, id) => {
+        element.classList.toggle("is-visible", id === siteId);
+      });
+    }
+
+    function showCountryFlags(countryName) {
+      siteFlags.forEach(({ element, feature }) => {
+        element.classList.toggle("is-visible", feature.properties.country === countryName);
       });
     }
 
     function clearSiteDetail() {
       const detail = document.getElementById("site-detail");
       detail.classList.remove("is-visible");
+      clearActiveSiteGallery();
       siteFlags.forEach(({ element }) => {
         element.classList.remove("is-visible");
       });
@@ -1221,6 +1772,7 @@
       renderCountryButtons();
       globeSpin.enabled = false;
       globeSpin.flyToInProgress = true;
+      showWorldTitle();
 
       map.once("moveend", () => {
         globeSpin.enabled = true;
@@ -1262,8 +1814,10 @@
 
       globeSpin.enabled = false;
       globeSpin.flyToInProgress = true;
+      hideWorldTitle();
       clearSiteDetail();
       renderSiteButtons(country.label);
+      showCountryFlags(country.label);
 
       map.flyTo({
         center: [country.longitude, country.latitude],
@@ -1286,8 +1840,15 @@
 
       globeSpin.enabled = false;
       globeSpin.flyToInProgress = true;
+      hideWorldTitle();
       updateSiteDetail(feature);
       showSiteFlag(feature);
+      activeSiteFeature = feature;
+      hideGalleryTrigger();
+
+      map.once("moveend", () => {
+        showGalleryTrigger(feature);
+      });
 
       map.flyTo({
         center: [site.longitude, site.latitude],
@@ -1320,6 +1881,43 @@
         globeSpin.flyToInProgress = false;
       });
     }
+
+    document.getElementById("gallery-trigger").addEventListener("click", openGallery);
+    document.getElementById("gallery-close").addEventListener("click", closeGallery);
+    document.getElementById("gallery-prev").addEventListener("click", () => stepGallery(-1));
+    document.getElementById("gallery-next").addEventListener("click", () => stepGallery(1));
+    document.getElementById("about-link").addEventListener("click", openAbout);
+    document.getElementById("about-close").addEventListener("click", closeAbout);
+    document.getElementById("gallery-overlay").addEventListener("click", (event) => {
+      if (event.target.id === "gallery-overlay") {
+        closeGallery();
+      }
+    });
+    document.getElementById("about-overlay").addEventListener("click", (event) => {
+      if (event.target.id === "about-overlay") {
+        closeAbout();
+      }
+    });
+    window.addEventListener("keydown", (event) => {
+      const galleryOpen = document.getElementById("gallery-overlay").classList.contains("is-visible");
+
+      if (event.key === "Escape") {
+        closeGallery();
+        closeAbout();
+      }
+
+      if (!galleryOpen) {
+        return;
+      }
+
+      if (event.key === "ArrowLeft") {
+        stepGallery(-1);
+      }
+
+      if (event.key === "ArrowRight") {
+        stepGallery(1);
+      }
+    });
 
     function startGlobeSpin() {
       if (globeSpin.frameId !== null) {

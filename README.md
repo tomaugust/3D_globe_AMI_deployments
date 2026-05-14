@@ -1,103 +1,193 @@
-# Anguilla AMI 3D Globe
+# AMI 3D Globe
 
-Interactive 3D globe visualisation for Anguilla AMI deployment sites.
+A static, interactive 3D globe for exploring insect monitoring stations around
+the world. The visualisation is designed for GitHub Pages and is built as a
+single generated `index.html` file.
 
-The project is designed as a small, static GitHub Pages site. The published
-page is `index.html`, which is generated from the editable data files in
-`data/` by `scripts/build_map.R`.
+The editable source of truth is:
 
-## What It Shows
+- `data/sites.csv` for site records, map positions, metrics, and image paths
+- `data/images/` for local site photographs and gallery images
+- `scripts/build_map.R` for the HTML, CSS, JavaScript, and embedded data build
 
-The map opens as a slowly rotating globe and highlights Anguilla and the AMI
-deployment locations. Users can:
+## User Experience
 
-- drag, zoom, rotate, and pitch the MapLibre globe;
-- use the site buttons to fly to a deployment location;
-- click deployment markers or labels to open a popup;
-- view a short site description and credited image for each deployment site.
+The page opens on a slowly rotating world view with a floating title:
 
-Current deployment sites are:
+```text
+Be Inspired
+Explore insect monitoring stations around the world
+```
 
-- Fountain reserve
-- Prickly Pear Cay
-- Dog Island
-- Sombrero Island
+The interface then lets users:
 
-## Project Structure
+- choose a country from the control panel;
+- fly the globe camera to that country;
+- see all site name flags for the selected country;
+- choose a specific monitoring station;
+- view station metrics, a local site photograph, description, and image credit;
+- open a centered image carousel for that site's gallery;
+- cycle gallery images with arrow buttons or keyboard left/right keys;
+- return to the world view.
+
+The current site data includes monitoring stations grouped under:
+
+- Anguilla
+- Costa Rica
+- Japan
+- Thailand
+- United Kingdom
+
+## File Structure
 
 ```text
 .
 |-- index.html
 |-- README.md
 |-- data/
-|   `-- sites.csv
+|   |-- sites.csv
+|   `-- images/
+|       `-- <country-slug>/
+|           `-- <site-slug>/
+|               |-- photo.jpg
+|               `-- gallery/
+|                   |-- moth-01.png
+|                   |-- moth-02.png
+|                   |-- moth-03.png
+|                   `-- captions.csv
 |-- scripts/
-|   `-- build_map.R
+|   |-- build_map.R
+|   `-- localise_site_images.R
 `-- .github/
     `-- workflows/
         `-- pages.yml
 ```
 
-## Key Files
+## Core Files
 
 `index.html`
 
-The standalone web page served by GitHub Pages. It contains the MapLibre setup,
-CSS, embedded site data, and all browser interaction code.
+The generated static site served by GitHub Pages. It includes the page markup,
+styles, MapLibre setup, embedded GeoJSON/site data, and all browser-side
+interaction code. Do not edit this by hand for durable changes; regenerate it
+from `scripts/build_map.R`.
 
 `scripts/build_map.R`
 
-The source build script. It reads `data/sites.csv`, converts the site table to
-GeoJSON, inserts the generated JSON into the HTML template, and writes a fresh
-`index.html`.
+Builds the site. It reads `data/sites.csv`, discovers each site's gallery image
+paths, creates the GeoJSON and country camera data, injects everything into the
+HTML template, and writes `index.html`.
+
+`scripts/localise_site_images.R`
+
+Utility for converting remote `photo_url` values in `data/sites.csv` into local
+image files. It downloads each image into `data/images/<country>/<site>/` and
+updates `photo_url` to point at the local path.
 
 `data/sites.csv`
 
-The editable list of deployment locations, camera settings, descriptions, and
-image credits.
+The editable site table. Each row represents one monitoring station.
+
+`data/images/`
+
+Local image assets used by the generated site. Each station has a primary
+`photo.jpg` and a `gallery/` directory. The current gallery contents are
+temporary generated moth-on-backboard images with editable captions stored in
+each gallery's `captions.csv`.
 
 `.github/workflows/pages.yml`
 
-GitHub Actions workflow that deploys the repository root to GitHub Pages after
-pushes to `main`.
+GitHub Actions workflow for publishing the repository root to GitHub Pages.
 
 ## Data Schema
 
-`data/sites.csv` has one row per deployment site.
+`data/sites.csv` contains one row per monitoring station.
 
-| Column | Purpose |
+| Column | Description |
 | --- | --- |
-| `id` | Stable machine-readable site identifier. Keep this unique. |
-| `country` | Country grouping used for the first-level HUD buttons. |
-| `site` | Display name used in buttons, labels, popups, and detail panel. |
-| `lon` | Site longitude in WGS84 decimal degrees. |
-| `lat` | Site latitude in WGS84 decimal degrees. |
-| `zoom` | Map zoom level used when flying to the site. |
+| `id` | Unique URL-safe site identifier, for example `fountain-reserve`. |
+| `country` | Country grouping used for the first-level buttons. |
+| `site` | Display name used in buttons, labels, popups, and detail panels. |
+| `lon` | Longitude in WGS84 decimal degrees. |
+| `lat` | Latitude in WGS84 decimal degrees. |
+| `zoom` | Map zoom used when flying to the site. |
 | `pitch` | Camera pitch used when flying to the site. |
 | `bearing` | Camera bearing used when flying to the site. |
-| `number_of_nights` | Dummy deployment duration metric for prototyping. |
-| `number_of_images` | Dummy image volume metric for prototyping. |
-| `number_of_detections` | Dummy detection volume metric for prototyping. |
-| `setting` | Short descriptive text shown in the popup and detail panel. |
-| `photo_url` | Image URL shown in the detail panel. |
-| `photo_credit` | Credit line for the image. |
-| `photo_link` | Link target for the image credit. |
+| `number_of_nights` | Station metric shown in the detail panel. |
+| `number_of_images` | Station metric shown in the detail panel. |
+| `number_of_detections` | Station metric shown in the detail panel. |
+| `setting` | Short site description shown in popups and detail panels. |
+| `photo_url` | Local path to the primary site image. |
+| `photo_credit` | Image credit shown in the detail panel. |
+| `photo_link` | URL opened from the image credit link. |
 
-## Editing Site Content
+## Image Assets
 
-To add or change deployment locations:
+Primary site images and gallery images are local project files. Use lower-case,
+URL-safe folder slugs that match the country and site naming pattern.
 
-1. Edit `data/sites.csv`.
-2. Keep `id` values unique and URL-safe, for example `new-site-name`.
-3. Set `country` to the country-level group that should appear in the first HUD
-   menu, for example `Anguilla` or `United Kingdom`.
-4. Use decimal longitude and latitude in EPSG:4326 / WGS84.
-5. Adjust `zoom`, `pitch`, and `bearing` so the fly-to camera frames the site
-   well.
-6. Rebuild `index.html` with the command below.
-7. Open `index.html` locally to check the result before committing.
+Expected structure for a site:
 
-## Rebuilding The Site
+```text
+data/images/<country-slug>/<site-slug>/
+|-- photo.jpg
+`-- gallery/
+    |-- image-01.jpg
+    |-- image-02.jpg
+    |-- image-03.jpg
+    `-- captions.csv
+```
+
+The gallery may contain `.jpg`, `.jpeg`, `.png`, or `.webp` files. During the
+build, `scripts/build_map.R` scans each site's `gallery/` folder and embeds the
+sorted image paths in `index.html`.
+
+Each gallery should also include `captions.csv` with this schema:
+
+| Column | Description |
+| --- | --- |
+| `image` | File name of the gallery image, for example `moth-01.png`. |
+| `caption` | Caption text for that image. |
+
+Example:
+
+```csv
+image,caption
+"moth-01.png","Large silk moth on monitoring board"
+"moth-02.png","Mixed moth assemblage on white backboard"
+```
+
+The placeholder galleries currently use:
+
+```text
+moth-01.png
+moth-02.png
+moth-03.png
+```
+
+## Editing Content
+
+To edit an existing site:
+
+1. Update the relevant row in `data/sites.csv`.
+2. Replace or add files under that site's `data/images/<country>/<site>/`
+   folder if needed.
+3. Run the build script.
+4. Preview `index.html`.
+5. Commit `data/`, `scripts/`, and the regenerated `index.html` together.
+
+To add a new site:
+
+1. Add a row to `data/sites.csv` with a unique `id`.
+2. Create `data/images/<country-slug>/<site-slug>/photo.jpg`.
+3. Create `data/images/<country-slug>/<site-slug>/gallery/`.
+4. Add gallery images to that folder.
+5. Add `captions.csv` to the gallery folder.
+6. Set `photo_url` in `data/sites.csv` to the local `photo.jpg` path.
+7. Tune `zoom`, `pitch`, and `bearing` for the site camera.
+8. Rebuild and preview.
+
+## Building
 
 Run from the repository root:
 
@@ -105,19 +195,19 @@ Run from the repository root:
 Rscript .\scripts\build_map.R
 ```
 
-Or, if R is not on your `PATH`, use the full Rscript path, for example:
+If `Rscript` is not on `PATH`, use the full Windows path:
 
 ```powershell
 & 'C:\Program Files\R\R-4.6.0\bin\Rscript.exe' .\scripts\build_map.R
 ```
 
-The script requires these R packages:
+Required R packages:
 
 - `sf`
 - `dplyr`
 - `jsonlite`
 
-If any are missing, install them in R:
+Install missing packages in R:
 
 ```r
 install.packages(c("sf", "dplyr", "jsonlite"))
@@ -125,9 +215,9 @@ install.packages(c("sf", "dplyr", "jsonlite"))
 
 ## Local Preview
 
-Because the site is a single static HTML file, you can usually preview it by
-opening `index.html` in a browser. A local web server is also fine if you prefer
-to test it over HTTP:
+For a quick check, open `index.html` directly in a browser.
+
+For an HTTP preview, run:
 
 ```powershell
 python -m http.server 8000
@@ -139,78 +229,60 @@ Then open:
 http://localhost:8000/
 ```
 
-The page loads MapLibre, OpenStreetMap tiles, glyphs, and site images from
-external URLs, so it needs an internet connection for the full visual experience.
+The page uses local site images, but still loads MapLibre, fonts, glyphs, and
+OpenStreetMap tiles from external URLs.
 
-## GitHub Pages Deployment
+## Deployment
 
-This repository includes a GitHub Actions Pages workflow in
+The site is deployed through GitHub Pages using the workflow at
 `.github/workflows/pages.yml`.
 
-To deploy:
+Deployment flow:
 
-1. Push the repository to GitHub.
-2. In the GitHub repository, go to **Settings > Pages**.
-3. Set the source to **GitHub Actions**.
-4. Push to `main`.
-5. The workflow will upload the repository root and publish `index.html`.
+1. Rebuild `index.html`.
+2. Commit the source files, local assets, and generated HTML.
+3. Push to `main`.
+4. GitHub Actions publishes the repository root to Pages.
 
-For the intended repository:
+The configured remote is:
 
-```powershell
-git remote add origin https://github.com/tomaugust/3D_globe_AMI_deployments.git
-git push -u origin main
+```text
+https://github.com/tomaugust/3D_globe_AMI_deployments.git
 ```
 
-Once Pages has deployed, the site should be available at:
+The published site is expected at:
 
 ```text
 https://tomaugust.github.io/3D_globe_AMI_deployments/
 ```
 
-If the workflow fails at `Configure Pages` with `Get Pages site failed` or
-`HttpError: Not Found`, the repository has not yet been enabled as a GitHub
-Pages site. Open **Settings > Pages** in the GitHub repository and set the build
-and deployment source to **GitHub Actions**, then re-run the workflow.
+In the GitHub repository settings, Pages should be configured to use
+**GitHub Actions** as the build and deployment source.
 
-## Implementation Notes
+## Runtime Dependencies
 
-- The browser map uses MapLibre GL JS 5.3.0 from the unpkg CDN.
-- The map style uses OpenStreetMap raster tiles with subdued styling.
-- Globe projection is enabled with `map.setProjection({ type: "globe" })` when
-  supported by the loaded MapLibre version.
-- The site GeoJSON is embedded directly in `index.html` by the R build script.
-  This keeps GitHub Pages deployment simple because there is no runtime data
-  fetch.
-- The initial globe rotation stops when the user interacts with the map or when
-  the map zooms in beyond the configured spin threshold.
-- The site detail panel uses externally hosted, credited images. If an external
-  image URL changes or becomes unavailable, update the relevant row in
-  `data/sites.csv` and rebuild.
-
-## Maintenance Checklist
-
-Before pushing changes:
-
-1. Update `data/sites.csv` as needed.
-2. Run `Rscript .\scripts\build_map.R`.
-3. Confirm `index.html` changed as expected.
-4. Preview the site locally.
-5. Commit both the source data/script changes and the regenerated `index.html`.
-6. Push to `main` and check the GitHub Pages workflow.
-
-## Review Notes
-
-The codebase is intentionally compact and suitable for GitHub Pages. The main
-maintenance point is that `index.html` is generated output, while
-`scripts/build_map.R` and `data/` are the source of truth. For durable edits,
-change the data or build script first, then regenerate the HTML.
-
-Two external dependencies are loaded at runtime:
+Runtime assets loaded from CDNs or external services:
 
 - MapLibre GL JS and CSS from unpkg
-- OpenStreetMap raster tiles and remote image URLs
+- MapLibre glyphs from `demotiles.maplibre.org`
+- OpenStreetMap raster tiles
+- Google Fonts for the world-view script title
 
-If the visualisation needs to work offline or in a locked-down network
-environment, those assets would need to be vendored or replaced with locally
-hosted equivalents.
+Runtime assets loaded locally from the repository:
+
+- site detail photographs under `data/images/`
+- gallery carousel images under each site's `gallery/` folder
+- embedded site and country data generated into `index.html`
+
+## Maintenance Notes
+
+`index.html` is generated output. Durable changes should be made in
+`scripts/build_map.R`, `data/sites.csv`, or `data/images/`, then rebuilt.
+
+Before pushing:
+
+1. Run `Rscript .\scripts\build_map.R`.
+2. Preview the site.
+3. Check `git status` includes the intended source, asset, and generated HTML
+   changes.
+4. Commit and push to `main`.

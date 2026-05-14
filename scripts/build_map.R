@@ -24,6 +24,27 @@ make_id <- function(value) {
   gsub("(^-|-$)", "", value)
 }
 
+local_path <- function(path) {
+  gsub("\\\\", "/", path)
+}
+
+gallery_images <- function(photo_url) {
+  gallery_dir <- file.path(project_dir, dirname(photo_url), "gallery")
+
+  if (!dir.exists(gallery_dir)) {
+    return(character())
+  }
+
+  files <- list.files(
+    gallery_dir,
+    pattern = "\\.(jpg|jpeg|png|webp)$",
+    full.names = FALSE,
+    ignore.case = TRUE
+  )
+
+  local_path(file.path(dirname(photo_url), "gallery", sort(files)))
+}
+
 sites_sf <- st_as_sf(
   sites,
   coords = c("lon", "lat"),
@@ -54,7 +75,8 @@ site_features <- sites |>
         setting = setting,
         photo_url = photo_url,
         photo_credit = photo_credit,
-        photo_link = photo_link
+        photo_link = photo_link,
+        gallery_images = gallery_images(photo_url)
       )
     ))
   ) |>
@@ -102,13 +124,22 @@ country_views_json <- sites |>
     id = make_id(country),
     label = country,
     zoom = case_when(
+      country == "Thailand" ~ 4.8,
       site_count == 1 ~ 10.4,
       pmax(lon_span, lat_span) < 0.75 ~ 9.0,
       pmax(lon_span, lat_span) < 5 ~ 5.2,
       TRUE ~ 2.2
     ),
-    pitch = if_else(site_count == 1, 45, 52),
-    bearing = if_else(country == "Anguilla", -18, -8)
+    pitch = case_when(
+      country == "Thailand" ~ 42,
+      site_count == 1 ~ 45,
+      TRUE ~ 52
+    ),
+    bearing = case_when(
+      country == "Anguilla" ~ -18,
+      country == "Thailand" ~ 0,
+      TRUE ~ -8
+    )
   ) |>
   select(id, label, longitude, latitude, zoom, pitch, bearing, site_count) |>
   toJSON(
@@ -126,6 +157,7 @@ html <-
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Anguilla AMI Sites - Interactive 3D Map</title>
   <link href="https://unpkg.com/maplibre-gl@5.3.0/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/maplibre-gl@5.3.0/dist/maplibre-gl.js"></script>
   <style>
     :root {
@@ -151,6 +183,185 @@ html <-
     #map {
       position: absolute;
       inset: 0;
+    }
+
+    .world-title {
+      position: absolute;
+      left: 50%;
+      top: 48%;
+      z-index: 2;
+      width: min(760px, calc(100vw - 48px));
+      color: var(--ink);
+      text-align: center;
+      text-shadow: 0 4px 24px rgba(0, 0, 0, 0.72), 0 1px 1px rgba(0, 0, 0, 0.8);
+      pointer-events: none;
+      opacity: 0;
+      transform: translate(-50%, -50%) translateY(12px);
+      transition: opacity 520ms ease, transform 520ms ease;
+    }
+
+    .world-title.is-visible {
+      opacity: 1;
+      transform: translate(-50%, -50%) translateY(0);
+    }
+
+    .world-title h2 {
+      margin: 0;
+      color: #ffffff;
+      font-family: "Great Vibes", "Brush Script MT", cursive;
+      font-size: clamp(70px, 11vw, 150px);
+      font-weight: 400;
+      line-height: 0.82;
+    }
+
+    .world-title p {
+      margin: 16px 0 0;
+      color: #ffffff;
+      font-size: clamp(15px, 2.1vw, 25px);
+      font-weight: 400;
+      line-height: 1.25;
+      text-wrap: balance;
+    }
+
+    .about-link {
+      position: absolute;
+      top: 18px;
+      right: 78px;
+      z-index: 4;
+      border: 0;
+      background: transparent;
+      color: rgba(248, 251, 255, 0.62);
+      font: inherit;
+      font-size: 13px;
+      line-height: 1.2;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      cursor: pointer;
+    }
+
+    .about-link:hover {
+      color: #ffffff;
+    }
+
+    .about-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 6;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 28px;
+      background: rgba(4, 10, 15, 0.62);
+      backdrop-filter: blur(8px);
+      box-sizing: border-box;
+    }
+
+    .about-overlay.is-visible {
+      display: flex;
+    }
+
+    .about-panel {
+      width: min(720px, calc(100vw - 56px));
+      max-height: min(760px, calc(100vh - 56px));
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 8px;
+      background: linear-gradient(145deg, rgba(8, 22, 34, 0.97), rgba(6, 14, 22, 0.92));
+      color: var(--ink);
+      box-shadow: 0 28px 90px rgba(0, 0, 0, 0.52);
+      overflow-y: auto;
+    }
+
+    .about-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 20px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .about-header h2 {
+      margin: 0;
+      color: #ffffff;
+      font-size: 24px;
+      line-height: 1.15;
+    }
+
+    .about-close {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+      width: 34px;
+      height: 34px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--ink);
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .about-close:hover {
+      border-color: rgba(243, 201, 105, 0.5);
+      color: var(--gold);
+    }
+
+    .about-content {
+      padding: 18px 20px 20px;
+    }
+
+    .about-content p {
+      margin: 0 0 14px;
+      color: rgba(248, 251, 255, 0.82);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .about-content h3 {
+      margin: 18px 0 8px;
+      color: #ffffff;
+      font-size: 14px;
+      line-height: 1.25;
+      text-transform: uppercase;
+    }
+
+    .about-links {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .about-logo-link {
+      min-width: 0;
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--ink);
+      text-decoration: none;
+    }
+
+    .about-logo-link strong {
+      display: block;
+      color: #ffffff;
+      font-size: 15px;
+      line-height: 1.15;
+    }
+
+    .about-logo-link span {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    .about-logo-link:hover {
+      border-color: rgba(243, 201, 105, 0.5);
+      color: var(--gold);
     }
 
     .hud {
@@ -415,6 +626,157 @@ html <-
       line-height: 1.25;
     }
 
+    .gallery-trigger {
+      position: absolute;
+      left: 50%;
+      top: 58%;
+      z-index: 3;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 136px;
+      min-height: 42px;
+      padding: 10px 16px;
+      border: 1px solid rgba(243, 201, 105, 0.68);
+      border-radius: 8px;
+      background: linear-gradient(145deg, rgba(243, 201, 105, 0.96), rgba(88, 214, 198, 0.9));
+      color: #07111a;
+      font-size: 12px;
+      font-weight: 850;
+      letter-spacing: 0;
+      text-transform: uppercase;
+      box-shadow: 0 18px 42px rgba(0, 0, 0, 0.32);
+      cursor: pointer;
+      opacity: 0;
+      pointer-events: none;
+      transform: translate(-50%, -50%) translateY(14px);
+      transition: opacity 240ms ease, transform 240ms ease;
+    }
+
+    .gallery-trigger.is-visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translate(-50%, -50%) translateY(0);
+    }
+
+    .gallery-trigger:hover {
+      transform: translate(-50%, -50%) translateY(-2px);
+    }
+
+    .gallery-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 28px;
+      background: rgba(4, 10, 15, 0.62);
+      backdrop-filter: blur(8px);
+      box-sizing: border-box;
+    }
+
+    .gallery-overlay.is-visible {
+      display: flex;
+    }
+
+    .gallery-panel {
+      width: min(860px, calc(100vw - 56px));
+      max-height: min(720px, calc(100vh - 56px));
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 8px;
+      background: linear-gradient(145deg, rgba(8, 22, 34, 0.96), rgba(6, 14, 22, 0.9));
+      color: var(--ink);
+      box-shadow: 0 28px 90px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+    }
+
+    .gallery-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 15px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .gallery-header h2 {
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.2;
+    }
+
+    .gallery-close {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--ink);
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .gallery-close:hover {
+      border-color: rgba(243, 201, 105, 0.5);
+      color: var(--gold);
+    }
+
+    .gallery-carousel {
+      position: relative;
+      display: grid;
+      grid-template-columns: 52px minmax(0, 1fr) 52px;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+    }
+
+    .gallery-image-frame {
+      min-width: 0;
+    }
+
+    .gallery-image-frame img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      max-height: calc(100vh - 170px);
+      border-radius: 8px;
+      object-fit: cover;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .gallery-arrow {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--ink);
+      font-size: 28px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .gallery-arrow:hover {
+      border-color: rgba(243, 201, 105, 0.55);
+      color: var(--gold);
+      background: rgba(243, 201, 105, 0.12);
+    }
+
+    .gallery-counter {
+      margin: 0 0 16px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
     .legend {
       position: absolute;
       right: 26px;
@@ -479,6 +841,36 @@ html <-
         font-size: 23px;
       }
 
+      .world-title {
+        top: 54%;
+      }
+
+      .world-title h2 {
+        font-size: clamp(56px, 18vw, 92px);
+      }
+
+      .world-title p {
+        font-size: 15px;
+      }
+
+      .about-link {
+        right: 16px;
+        top: 15px;
+      }
+
+      .about-overlay {
+        padding: 14px;
+      }
+
+      .about-panel {
+        width: calc(100vw - 28px);
+        max-height: calc(100vh - 28px);
+      }
+
+      .about-links {
+        grid-template-columns: 1fr;
+      }
+
       .site-list {
         grid-template-columns: 1fr;
       }
@@ -488,11 +880,74 @@ html <-
         right: auto;
         bottom: 18px;
       }
+
+      .gallery-trigger {
+        top: 62%;
+      }
+
+      .gallery-overlay {
+        padding: 14px;
+      }
+
+      .gallery-panel {
+        width: calc(100vw - 28px);
+        max-height: calc(100vh - 28px);
+      }
+
+      .gallery-carousel {
+        grid-template-columns: 42px minmax(0, 1fr) 42px;
+        gap: 8px;
+        padding: 12px;
+      }
+
+      .gallery-arrow {
+        width: 38px;
+        height: 38px;
+        font-size: 24px;
+      }
     }
   </style>
 </head>
 <body>
   <div id="map"></div>
+  <section class="world-title is-visible" id="world-title" aria-label="Global introduction">
+    <h2>Be Inspired</h2>
+    <p>Explore insect monitoring stations around the world</p>
+  </section>
+  <button class="about-link" id="about-link" type="button">About</button>
+  <div class="about-overlay" id="about-overlay" role="dialog" aria-modal="true" aria-labelledby="about-title">
+    <section class="about-panel">
+      <div class="about-header">
+        <h2 id="about-title">About INSPIRE</h2>
+        <button class="about-close" id="about-close" type="button" aria-label="Close about panel">&times;</button>
+      </div>
+      <div class="about-content">
+        <p>INSPIRE explores how new technology and citizen science can help people understand and protect insects around the world. Insects pollinate crops, recycle nutrients, feed wildlife, and give early warnings about environmental change, but we still know far too little about how many insect populations are changing.</p>
+        <p>The project brings together AI-assisted camera systems for nocturnal insects with inclusive ways for people to contribute observations. By combining automated monitoring with community science, INSPIRE aims to create better evidence for conservation while helping more people connect with nature.</p>
+        <p>This globe highlights monitoring stations and partner locations in an emerging international network. The ambition is to support local and global biodiversity assessments, share open data, and make insect monitoring more visible, accessible, and useful. INSPIRE is supported by the Aberdeen Charitable Foundation.</p>
+
+        <h3>Find Out More</h3>
+        <div class="about-links">
+          <a class="about-logo-link" href="https://www.ceh.ac.uk/" target="_blank" rel="noopener">
+            <strong>UKCEH</strong>
+            <span>UK Centre for Ecology &amp; Hydrology</span>
+          </a>
+          <a class="about-logo-link" href="https://www.aberdeenplc.com/en-gb/news-and-insights/a-new-partnership-to-protect-insect-populations" target="_blank" rel="noopener">
+            <strong>Aberdeen Charitable Foundation</strong>
+            <span>Project funder and partner</span>
+          </a>
+          <a class="about-logo-link" href="https://ukpoms.org.uk/" target="_blank" rel="noopener">
+            <strong>UK PoMS</strong>
+            <span>UK Pollinator Monitoring Scheme</span>
+          </a>
+          <a class="about-logo-link" href="https://butterfly-monitoring.net/" target="_blank" rel="noopener">
+            <strong>Butterfly Monitoring</strong>
+            <span>International butterfly monitoring networks</span>
+          </a>
+        </div>
+      </div>
+    </section>
+  </div>
 
   <section class="hud" aria-label="Map controls">
     <p class="eyebrow">Anguilla AMI survey</p>
@@ -513,6 +968,23 @@ html <-
   </section>
 
   <div class="legend"><span></span>AMI deployment site</div>
+  <button class="gallery-trigger" id="gallery-trigger" type="button">View Gallery</button>
+  <div class="gallery-overlay" id="gallery-overlay" role="dialog" aria-modal="true" aria-labelledby="gallery-title">
+    <section class="gallery-panel">
+      <div class="gallery-header">
+        <h2 id="gallery-title">Site gallery</h2>
+        <button class="gallery-close" id="gallery-close" type="button" aria-label="Close gallery">&times;</button>
+      </div>
+      <div class="gallery-carousel">
+        <button class="gallery-arrow" id="gallery-prev" type="button" aria-label="Previous gallery image">&lsaquo;</button>
+        <div class="gallery-image-frame">
+          <img id="gallery-image" alt="">
+        </div>
+        <button class="gallery-arrow" id="gallery-next" type="button" aria-label="Next gallery image">&rsaquo;</button>
+      </div>
+      <p class="gallery-counter" id="gallery-counter"></p>
+    </section>
+  </div>
 
   <script>
     const sites = __SITES_GEOJSON__;
@@ -523,6 +995,9 @@ html <-
     const countryLookup = new Map(countries.map((country) => [country.id, country]));
     const siteCenter = [__CENTER_LON__, __CENTER_LAT__];
     const siteFlags = new Map();
+    let activeSiteFeature = null;
+    let activeGalleryImages = [];
+    let activeGalleryIndex = 0;
     const globalView = {
       center: [0, 18],
       zoom: 1.15,
@@ -720,6 +1195,92 @@ html <-
       });
     }
 
+    function showGalleryTrigger(feature) {
+      const trigger = document.getElementById("gallery-trigger");
+      const hasGallery = Array.isArray(feature.properties.gallery_images) && feature.properties.gallery_images.length > 0;
+      activeSiteFeature = feature;
+      trigger.classList.toggle("is-visible", hasGallery);
+    }
+
+    function hideGalleryTrigger() {
+      document.getElementById("gallery-trigger").classList.remove("is-visible");
+      closeGallery();
+    }
+
+    function clearActiveSiteGallery() {
+      activeSiteFeature = null;
+      hideGalleryTrigger();
+    }
+
+    function openGallery() {
+      if (!activeSiteFeature) {
+        return;
+      }
+
+      const images = activeSiteFeature.properties.gallery_images || [];
+      if (!images.length) {
+        return;
+      }
+
+      const overlay = document.getElementById("gallery-overlay");
+      const title = document.getElementById("gallery-title");
+
+      title.textContent = `${activeSiteFeature.properties.site} gallery`;
+      activeGalleryImages = images;
+      activeGalleryIndex = 0;
+      renderGalleryImage();
+
+      overlay.classList.add("is-visible");
+    }
+
+    function closeGallery() {
+      const overlay = document.getElementById("gallery-overlay");
+      if (overlay) {
+        overlay.classList.remove("is-visible");
+      }
+    }
+
+    function openAbout() {
+      document.getElementById("about-overlay").classList.add("is-visible");
+    }
+
+    function closeAbout() {
+      document.getElementById("about-overlay").classList.remove("is-visible");
+    }
+
+    function showWorldTitle() {
+      document.getElementById("world-title").classList.add("is-visible");
+    }
+
+    function hideWorldTitle() {
+      document.getElementById("world-title").classList.remove("is-visible");
+    }
+
+    function renderGalleryImage() {
+      const image = document.getElementById("gallery-image");
+      const counter = document.getElementById("gallery-counter");
+
+      if (!activeGalleryImages.length) {
+        image.removeAttribute("src");
+        image.alt = "";
+        counter.textContent = "";
+        return;
+      }
+
+      image.src = activeGalleryImages[activeGalleryIndex];
+      image.alt = `${activeSiteFeature.properties.site} gallery image ${activeGalleryIndex + 1}`;
+      counter.textContent = `${activeGalleryIndex + 1} / ${activeGalleryImages.length}`;
+    }
+
+    function stepGallery(direction) {
+      if (!activeGalleryImages.length) {
+        return;
+      }
+
+      activeGalleryIndex = (activeGalleryIndex + direction + activeGalleryImages.length) % activeGalleryImages.length;
+      renderGalleryImage();
+    }
+
     function formatMetric(value) {
       return Number(value).toLocaleString();
     }
@@ -732,7 +1293,6 @@ html <-
           <div class="site-flag-body">
             <div class="site-flag-card">
               <strong>${feature.properties.site}</strong>
-              <span>${feature.properties.setting}</span>
             </div>
           </div>
         `;
@@ -747,21 +1307,28 @@ html <-
           .setLngLat(feature.geometry.coordinates)
           .addTo(map);
 
-        siteFlags.set(feature.properties.site, { marker, element });
+        siteFlags.set(feature.properties.id, { marker, element, feature });
       });
     }
 
     function showSiteFlag(feature) {
-      const siteName = feature.properties.site;
+      const siteId = feature.properties.id;
 
-      siteFlags.forEach(({ element }, name) => {
-        element.classList.toggle("is-visible", name === siteName);
+      siteFlags.forEach(({ element }, id) => {
+        element.classList.toggle("is-visible", id === siteId);
+      });
+    }
+
+    function showCountryFlags(countryName) {
+      siteFlags.forEach(({ element, feature }) => {
+        element.classList.toggle("is-visible", feature.properties.country === countryName);
       });
     }
 
     function clearSiteDetail() {
       const detail = document.getElementById("site-detail");
       detail.classList.remove("is-visible");
+      clearActiveSiteGallery();
       siteFlags.forEach(({ element }) => {
         element.classList.remove("is-visible");
       });
@@ -806,6 +1373,7 @@ html <-
       renderCountryButtons();
       globeSpin.enabled = false;
       globeSpin.flyToInProgress = true;
+      showWorldTitle();
 
       map.once("moveend", () => {
         globeSpin.enabled = true;
@@ -847,8 +1415,10 @@ html <-
 
       globeSpin.enabled = false;
       globeSpin.flyToInProgress = true;
+      hideWorldTitle();
       clearSiteDetail();
       renderSiteButtons(country.label);
+      showCountryFlags(country.label);
 
       map.flyTo({
         center: [country.longitude, country.latitude],
@@ -871,8 +1441,15 @@ html <-
 
       globeSpin.enabled = false;
       globeSpin.flyToInProgress = true;
+      hideWorldTitle();
       updateSiteDetail(feature);
       showSiteFlag(feature);
+      activeSiteFeature = feature;
+      hideGalleryTrigger();
+
+      map.once("moveend", () => {
+        showGalleryTrigger(feature);
+      });
 
       map.flyTo({
         center: [site.longitude, site.latitude],
@@ -905,6 +1482,43 @@ html <-
         globeSpin.flyToInProgress = false;
       });
     }
+
+    document.getElementById("gallery-trigger").addEventListener("click", openGallery);
+    document.getElementById("gallery-close").addEventListener("click", closeGallery);
+    document.getElementById("gallery-prev").addEventListener("click", () => stepGallery(-1));
+    document.getElementById("gallery-next").addEventListener("click", () => stepGallery(1));
+    document.getElementById("about-link").addEventListener("click", openAbout);
+    document.getElementById("about-close").addEventListener("click", closeAbout);
+    document.getElementById("gallery-overlay").addEventListener("click", (event) => {
+      if (event.target.id === "gallery-overlay") {
+        closeGallery();
+      }
+    });
+    document.getElementById("about-overlay").addEventListener("click", (event) => {
+      if (event.target.id === "about-overlay") {
+        closeAbout();
+      }
+    });
+    window.addEventListener("keydown", (event) => {
+      const galleryOpen = document.getElementById("gallery-overlay").classList.contains("is-visible");
+
+      if (event.key === "Escape") {
+        closeGallery();
+        closeAbout();
+      }
+
+      if (!galleryOpen) {
+        return;
+      }
+
+      if (event.key === "ArrowLeft") {
+        stepGallery(-1);
+      }
+
+      if (event.key === "ArrowRight") {
+        stepGallery(1);
+      }
+    });
 
     function startGlobeSpin() {
       if (globeSpin.frameId !== null) {

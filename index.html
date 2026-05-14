@@ -419,6 +419,24 @@
         "photo_credit": "David Broad, CC BY 3.0",
         "photo_link": "https://commons.wikimedia.org/wiki/File:Sombrero_Island,_part_of_Anguilla_-_panoramio.jpg"
       }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -1.110698,
+          51.602377
+        ]
+      },
+      "properties": {
+        "id": "ukceh-wallingford",
+        "site": "UKCEH Wallingford",
+        "setting": "UKCEH headquarters and project coordination site at the Maclean Building, Crowmarsh Gifford",
+        "photo_url": "https://www.ceh.ac.uk/sites/default/files/styles/large/public/2023-02/TILE_Wallingford_hq_entrance_2022_740x548.jpg?itok=kqJEbg4D",
+        "photo_credit": "Main entrance image: UK Centre for Ecology & Hydrology",
+        "photo_link": "https://www.ceh.ac.uk/careers/our-sites-wallingford"
+      }
     }
   ]
 };
@@ -458,11 +476,20 @@
     "zoom": 11.2,
     "pitch": 68,
     "bearing": -35
+  },
+  {
+    "id": "ukceh-wallingford",
+    "label": "UKCEH Wallingford",
+    "longitude": -1.110698,
+    "latitude": 51.602377,
+    "zoom": 14.2,
+    "pitch": 62,
+    "bearing": -25
   }
 ];
     const siteLookup = new Map(pointsOfInterest.map((site) => [site.id, site]));
     const siteFeatureLookup = new Map(sites.features.map((feature) => [feature.properties.id, feature]));
-    const siteCenter = [-63.17726900, 18.37634605];
+    const siteCenter = [-32.26927070, 34.88163595];
     const siteFlags = new Map();
     const globeSpin = {
       enabled: true,

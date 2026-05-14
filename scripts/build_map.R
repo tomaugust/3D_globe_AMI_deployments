@@ -48,6 +48,9 @@ site_features <- sites |>
         id = id,
         country = country,
         site = site,
+        number_of_nights = number_of_nights,
+        number_of_images = number_of_images,
+        number_of_detections = number_of_detections,
         setting = setting,
         photo_url = photo_url,
         photo_credit = photo_credit,
@@ -156,12 +159,15 @@ html <-
       top: 24px;
       z-index: 2;
       width: min(390px, calc(100vw - 56px));
+      max-height: calc(100vh - 48px);
       padding: 20px 22px 18px;
       border: 1px solid var(--line);
       border-radius: 8px;
       background: linear-gradient(145deg, rgba(8, 22, 34, 0.82), rgba(6, 12, 18, 0.58));
       box-shadow: 0 22px 80px rgba(0, 0, 0, 0.34);
       backdrop-filter: blur(16px);
+      box-sizing: border-box;
+      overflow-y: auto;
     }
 
     .eyebrow {
@@ -236,21 +242,58 @@ html <-
     }
 
     .site-detail {
-      min-height: 86px;
-      margin-top: 16px;
-      padding: 14px 15px;
-      border: 1px solid rgba(243, 201, 105, 0.2);
+      max-height: 0;
+      margin-top: 0;
+      padding: 0 15px;
+      border: 0 solid rgba(243, 201, 105, 0.2);
       border-radius: 8px;
       background: linear-gradient(145deg, rgba(243, 201, 105, 0.14), rgba(88, 214, 198, 0.08));
       opacity: 0;
+      overflow: hidden;
       transform: translateY(8px);
-      transition: opacity 420ms ease, transform 420ms ease, border-color 420ms ease;
+      transition: max-height 420ms ease, margin-top 420ms ease, padding 420ms ease, opacity 420ms ease, transform 420ms ease, border-color 420ms ease;
     }
 
     .site-detail.is-visible {
+      max-height: 520px;
+      margin-top: 16px;
+      padding: 14px 15px;
+      border-width: 1px;
       opacity: 1;
       transform: translateY(0);
       border-color: rgba(243, 201, 105, 0.5);
+    }
+
+    .site-stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .site-stat {
+      min-width: 0;
+      padding: 8px 9px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .site-stat strong {
+      display: block;
+      color: var(--ink);
+      font-size: 15px;
+      line-height: 1.05;
+      font-weight: 850;
+    }
+
+    .site-stat span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 9px;
+      line-height: 1.15;
+      text-transform: uppercase;
     }
 
     .site-detail-photo {
@@ -429,7 +472,7 @@ html <-
         left: 14px;
         top: 14px;
         width: calc(100vw - 28px);
-        box-sizing: border-box;
+        max-height: calc(100vh - 28px);
       }
 
       h1 {
@@ -457,6 +500,11 @@ html <-
     <p>Choose a country to focus the globe, then select a site to fly in closer. Drag to pan, scroll to zoom, and hold right-click or Ctrl-drag to tilt the view.</p>
     <div class="site-list" id="site-list"></div>
     <article class="site-detail" id="site-detail" aria-live="polite">
+      <div class="site-stats">
+        <div class="site-stat"><strong id="site-stat-nights"></strong><span>Nights</span></div>
+        <div class="site-stat"><strong id="site-stat-images"></strong><span>Images</span></div>
+        <div class="site-stat"><strong id="site-stat-detections"></strong><span>Detections</span></div>
+      </div>
       <img class="site-detail-photo" id="site-detail-photo" alt="">
       <h2 id="site-detail-title"></h2>
       <p id="site-detail-setting"></p>
@@ -647,11 +695,17 @@ html <-
       const title = document.getElementById("site-detail-title");
       const setting = document.getElementById("site-detail-setting");
       const credit = document.getElementById("site-detail-credit");
+      const nights = document.getElementById("site-stat-nights");
+      const images = document.getElementById("site-stat-images");
+      const detections = document.getElementById("site-stat-detections");
       const siteName = feature.properties.site;
 
       detail.classList.remove("is-visible");
 
       window.setTimeout(() => {
+        nights.textContent = formatMetric(feature.properties.number_of_nights);
+        images.textContent = formatMetric(feature.properties.number_of_images);
+        detections.textContent = formatMetric(feature.properties.number_of_detections);
         photo.src = feature.properties.photo_url;
         photo.alt = `${siteName} thumbnail image`;
         title.textContent = siteName;
@@ -664,6 +718,10 @@ html <-
       document.querySelectorAll(".site-button").forEach((button) => {
         button.classList.toggle("is-active", button.dataset.site === feature.properties.id);
       });
+    }
+
+    function formatMetric(value) {
+      return Number(value).toLocaleString();
     }
 
     function buildSiteFlags() {

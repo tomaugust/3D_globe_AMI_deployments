@@ -38,12 +38,15 @@
       top: 24px;
       z-index: 2;
       width: min(390px, calc(100vw - 56px));
+      max-height: calc(100vh - 48px);
       padding: 20px 22px 18px;
       border: 1px solid var(--line);
       border-radius: 8px;
       background: linear-gradient(145deg, rgba(8, 22, 34, 0.82), rgba(6, 12, 18, 0.58));
       box-shadow: 0 22px 80px rgba(0, 0, 0, 0.34);
       backdrop-filter: blur(16px);
+      box-sizing: border-box;
+      overflow-y: auto;
     }
 
     .eyebrow {
@@ -118,21 +121,58 @@
     }
 
     .site-detail {
-      min-height: 86px;
-      margin-top: 16px;
-      padding: 14px 15px;
-      border: 1px solid rgba(243, 201, 105, 0.2);
+      max-height: 0;
+      margin-top: 0;
+      padding: 0 15px;
+      border: 0 solid rgba(243, 201, 105, 0.2);
       border-radius: 8px;
       background: linear-gradient(145deg, rgba(243, 201, 105, 0.14), rgba(88, 214, 198, 0.08));
       opacity: 0;
+      overflow: hidden;
       transform: translateY(8px);
-      transition: opacity 420ms ease, transform 420ms ease, border-color 420ms ease;
+      transition: max-height 420ms ease, margin-top 420ms ease, padding 420ms ease, opacity 420ms ease, transform 420ms ease, border-color 420ms ease;
     }
 
     .site-detail.is-visible {
+      max-height: 520px;
+      margin-top: 16px;
+      padding: 14px 15px;
+      border-width: 1px;
       opacity: 1;
       transform: translateY(0);
       border-color: rgba(243, 201, 105, 0.5);
+    }
+
+    .site-stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .site-stat {
+      min-width: 0;
+      padding: 8px 9px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .site-stat strong {
+      display: block;
+      color: var(--ink);
+      font-size: 15px;
+      line-height: 1.05;
+      font-weight: 850;
+    }
+
+    .site-stat span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 9px;
+      line-height: 1.15;
+      text-transform: uppercase;
     }
 
     .site-detail-photo {
@@ -311,7 +351,7 @@
         left: 14px;
         top: 14px;
         width: calc(100vw - 28px);
-        box-sizing: border-box;
+        max-height: calc(100vh - 28px);
       }
 
       h1 {
@@ -339,6 +379,11 @@
     <p>Choose a country to focus the globe, then select a site to fly in closer. Drag to pan, scroll to zoom, and hold right-click or Ctrl-drag to tilt the view.</p>
     <div class="site-list" id="site-list"></div>
     <article class="site-detail" id="site-detail" aria-live="polite">
+      <div class="site-stats">
+        <div class="site-stat"><strong id="site-stat-nights"></strong><span>Nights</span></div>
+        <div class="site-stat"><strong id="site-stat-images"></strong><span>Images</span></div>
+        <div class="site-stat"><strong id="site-stat-detections"></strong><span>Detections</span></div>
+      </div>
       <img class="site-detail-photo" id="site-detail-photo" alt="">
       <h2 id="site-detail-title"></h2>
       <p id="site-detail-setting"></p>
@@ -365,6 +410,9 @@
         "id": "fountain-reserve",
         "country": "Anguilla",
         "site": "Fountain reserve",
+        "number_of_nights": 42,
+        "number_of_images": 38000,
+        "number_of_detections": 360000,
         "setting": "Main island reserve site",
         "photo_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Color_Enhanced_Cavern_DCEN-4.jpg?width=640",
         "photo_credit": "Representative cavern image: Shadowmeld Photography, CC BY-SA 3.0",
@@ -384,6 +432,9 @@
         "id": "prickly-pear-cay",
         "country": "Anguilla",
         "site": "Prickly Pear Cay",
+        "number_of_nights": 57,
+        "number_of_images": 54000,
+        "number_of_detections": 520000,
         "setting": "Offshore cay deployment",
         "photo_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Anguilla_Prickly-Pear.jpg?width=640",
         "photo_credit": "Laurent Michelet, CC BY-SA 3.0 / GFDL",
@@ -403,6 +454,9 @@
         "id": "dog-island",
         "country": "Anguilla",
         "site": "Dog Island",
+        "number_of_nights": 76,
+        "number_of_images": 78000,
+        "number_of_detections": 740000,
         "setting": "Remote island deployment",
         "photo_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Dog_Island_Aguilla_Landsat.jpg?width=640",
         "photo_credit": "NASA Landsat 7, public domain",
@@ -422,6 +476,9 @@
         "id": "sombrero-island",
         "country": "Anguilla",
         "site": "Sombrero Island",
+        "number_of_nights": 93,
+        "number_of_images": 96000,
+        "number_of_detections": 910000,
         "setting": "Northern offshore deployment",
         "photo_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Sombrero_Island,_part_of_Anguilla_-_panoramio.jpg?width=640",
         "photo_credit": "David Broad, CC BY 3.0",
@@ -441,10 +498,233 @@
         "id": "ukceh-wallingford",
         "country": "United Kingdom",
         "site": "UKCEH Wallingford",
+        "number_of_nights": 24,
+        "number_of_images": 18000,
+        "number_of_detections": 240000,
         "setting": "UKCEH headquarters and project coordination site at the Maclean Building, Crowmarsh Gifford",
         "photo_url": "https://www.ceh.ac.uk/sites/default/files/styles/large/public/2023-02/TILE_Wallingford_hq_entrance_2022_740x548.jpg?itok=kqJEbg4D",
         "photo_credit": "Main entrance image: UK Centre for Ecology & Hydrology",
         "photo_link": "https://www.ceh.ac.uk/careers/our-sites-wallingford"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -84.795,
+          10.302
+        ]
+      },
+      "properties": {
+        "id": "monteverde-cloud-forest",
+        "country": "Costa Rica",
+        "site": "Monteverde Cloud Forest",
+        "number_of_nights": 68,
+        "number_of_images": 64000,
+        "number_of_detections": 620000,
+        "setting": "Dummy cloud forest AMI deployment site",
+        "photo_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Monteverde_cloud_forest.jpg?width=640",
+        "photo_credit": "Representative image: Wikimedia Commons",
+        "photo_link": "https://commons.wikimedia.org/wiki/File:Monteverde_cloud_forest.jpg"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -83.503,
+          10.541
+        ]
+      },
+      "properties": {
+        "id": "tortuguero-lowland-forest",
+        "country": "Costa Rica",
+        "site": "Tortuguero Lowland Forest",
+        "number_of_nights": 84,
+        "number_of_images": 88000,
+        "number_of_detections": 840000,
+        "setting": "Dummy Caribbean lowland forest AMI deployment site",
+        "photo_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Tortuguero_Canal.jpg?width=640",
+        "photo_credit": "Representative image: Wikimedia Commons",
+        "photo_link": "https://commons.wikimedia.org/wiki/File:Tortuguero_Canal.jpg"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -83.514,
+          8.533
+        ]
+      },
+      "properties": {
+        "id": "osa-peninsula-rainforest",
+        "country": "Costa Rica",
+        "site": "Osa Peninsula Rainforest",
+        "number_of_nights": 91,
+        "number_of_images": 93000,
+        "number_of_detections": 880000,
+        "setting": "Dummy Pacific rainforest AMI deployment site",
+        "photo_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Corcovado_National_Park_Costa_Rica.jpg?width=640",
+        "photo_credit": "Representative image: Wikimedia Commons",
+        "photo_link": "https://commons.wikimedia.org/wiki/File:Corcovado_National_Park_Costa_Rica.jpg"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -84.007,
+          10.431
+        ]
+      },
+      "properties": {
+        "id": "la-selva-biological-station",
+        "country": "Costa Rica",
+        "site": "La Selva Biological Station",
+        "number_of_nights": 72,
+        "number_of_images": 71000,
+        "number_of_detections": 690000,
+        "setting": "Dummy biological station AMI deployment site",
+        "photo_url": "https://commons.wikimedia.org/wiki/Special:FilePath/La_Selva_Biological_Station.jpg?width=640",
+        "photo_credit": "Representative image: Wikimedia Commons",
+        "photo_link": "https://commons.wikimedia.org/wiki/File:La_Selva_Biological_Station.jpg"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -85.618,
+          10.849
+        ]
+      },
+      "properties": {
+        "id": "guanacaste-dry-forest",
+        "country": "Costa Rica",
+        "site": "Guanacaste Dry Forest",
+        "number_of_nights": 49,
+        "number_of_images": 46000,
+        "number_of_detections": 430000,
+        "setting": "Dummy tropical dry forest AMI deployment site",
+        "photo_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Guanacaste_Dry_Forest.jpg?width=640",
+        "photo_credit": "Representative image: Wikimedia Commons",
+        "photo_link": "https://commons.wikimedia.org/wiki/File:Guanacaste_Dry_Forest.jpg"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          98.921,
+          18.797
+        ]
+      },
+      "properties": {
+        "id": "chiang-mai-forest-edge",
+        "country": "Thailand",
+        "site": "Chiang Mai Forest Edge",
+        "number_of_nights": 63,
+        "number_of_images": 59000,
+        "number_of_detections": 560000,
+        "setting": "Dummy northern Thailand forest-edge AMI deployment site",
+        "photo_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Doi_Suthep-Pui_National_Park.jpg?width=640",
+        "photo_credit": "Representative image: Wikimedia Commons",
+        "photo_link": "https://commons.wikimedia.org/wiki/File:Doi_Suthep-Pui_National_Park.jpg"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          101.372,
+          14.439
+        ]
+      },
+      "properties": {
+        "id": "khao-yai-evergreen-forest",
+        "country": "Thailand",
+        "site": "Khao Yai Evergreen Forest",
+        "number_of_nights": 88,
+        "number_of_images": 86000,
+        "number_of_detections": 820000,
+        "setting": "Dummy evergreen forest AMI deployment site",
+        "photo_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Khao_Yai_National_Park_Thailand.jpg?width=640",
+        "photo_credit": "Representative image: Wikimedia Commons",
+        "photo_link": "https://commons.wikimedia.org/wiki/File:Khao_Yai_National_Park_Thailand.jpg"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          99.447,
+          12.849
+        ]
+      },
+      "properties": {
+        "id": "kaeng-krachan-forest",
+        "country": "Thailand",
+        "site": "Kaeng Krachan Forest",
+        "number_of_nights": 79,
+        "number_of_images": 82000,
+        "number_of_detections": 790000,
+        "setting": "Dummy western forest complex AMI deployment site",
+        "photo_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Kaeng_Krachan_National_Park.jpg?width=640",
+        "photo_credit": "Representative image: Wikimedia Commons",
+        "photo_link": "https://commons.wikimedia.org/wiki/File:Kaeng_Krachan_National_Park.jpg"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          139.71,
+          35.686
+        ]
+      },
+      "properties": {
+        "id": "shinjuku-urban-park",
+        "country": "Japan",
+        "site": "Shinjuku Urban Park",
+        "number_of_nights": 36,
+        "number_of_images": 32000,
+        "number_of_detections": 310000,
+        "setting": "Dummy Tokyo urban green-space AMI deployment site",
+        "photo_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Shinjuku_Gyoen_National_Garden.jpg?width=640",
+        "photo_credit": "Representative image: Wikimedia Commons",
+        "photo_link": "https://commons.wikimedia.org/wiki/File:Shinjuku_Gyoen_National_Garden.jpg"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          139.773,
+          35.715
+        ]
+      },
+      "properties": {
+        "id": "ueno-urban-park",
+        "country": "Japan",
+        "site": "Ueno Urban Park",
+        "number_of_nights": 29,
+        "number_of_images": 26000,
+        "number_of_detections": 280000,
+        "setting": "Dummy Tokyo park AMI deployment site",
+        "photo_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Ueno_Park_Tokyo.jpg?width=640",
+        "photo_credit": "Representative image: Wikimedia Commons",
+        "photo_link": "https://commons.wikimedia.org/wiki/File:Ueno_Park_Tokyo.jpg"
       }
     }
   ]
@@ -499,6 +779,106 @@
     "zoom": 14.2,
     "pitch": 62,
     "bearing": -25
+  },
+  {
+    "id": "monteverde-cloud-forest",
+    "country": "Costa Rica",
+    "label": "Monteverde Cloud Forest",
+    "longitude": -84.795,
+    "latitude": 10.302,
+    "zoom": 12.4,
+    "pitch": 64,
+    "bearing": -28
+  },
+  {
+    "id": "tortuguero-lowland-forest",
+    "country": "Costa Rica",
+    "label": "Tortuguero Lowland Forest",
+    "longitude": -83.503,
+    "latitude": 10.541,
+    "zoom": 12.2,
+    "pitch": 62,
+    "bearing": 18
+  },
+  {
+    "id": "osa-peninsula-rainforest",
+    "country": "Costa Rica",
+    "label": "Osa Peninsula Rainforest",
+    "longitude": -83.514,
+    "latitude": 8.533,
+    "zoom": 12,
+    "pitch": 66,
+    "bearing": -12
+  },
+  {
+    "id": "la-selva-biological-station",
+    "country": "Costa Rica",
+    "label": "La Selva Biological Station",
+    "longitude": -84.007,
+    "latitude": 10.431,
+    "zoom": 12.6,
+    "pitch": 64,
+    "bearing": 8
+  },
+  {
+    "id": "guanacaste-dry-forest",
+    "country": "Costa Rica",
+    "label": "Guanacaste Dry Forest",
+    "longitude": -85.618,
+    "latitude": 10.849,
+    "zoom": 12.1,
+    "pitch": 60,
+    "bearing": -35
+  },
+  {
+    "id": "chiang-mai-forest-edge",
+    "country": "Thailand",
+    "label": "Chiang Mai Forest Edge",
+    "longitude": 98.921,
+    "latitude": 18.797,
+    "zoom": 12.4,
+    "pitch": 62,
+    "bearing": -20
+  },
+  {
+    "id": "khao-yai-evergreen-forest",
+    "country": "Thailand",
+    "label": "Khao Yai Evergreen Forest",
+    "longitude": 101.372,
+    "latitude": 14.439,
+    "zoom": 12.2,
+    "pitch": 64,
+    "bearing": 12
+  },
+  {
+    "id": "kaeng-krachan-forest",
+    "country": "Thailand",
+    "label": "Kaeng Krachan Forest",
+    "longitude": 99.447,
+    "latitude": 12.849,
+    "zoom": 12,
+    "pitch": 64,
+    "bearing": -10
+  },
+  {
+    "id": "shinjuku-urban-park",
+    "country": "Japan",
+    "label": "Shinjuku Urban Park",
+    "longitude": 139.71,
+    "latitude": 35.686,
+    "zoom": 13.6,
+    "pitch": 58,
+    "bearing": -24
+  },
+  {
+    "id": "ueno-urban-park",
+    "country": "Japan",
+    "label": "Ueno Urban Park",
+    "longitude": 139.773,
+    "latitude": 35.715,
+    "zoom": 13.8,
+    "pitch": 58,
+    "bearing": 18
   }
 ];
     const countries = [
@@ -511,6 +891,36 @@
     "pitch": 52,
     "bearing": -18,
     "site_count": 4
+  },
+  {
+    "id": "costa-rica",
+    "label": "Costa Rica",
+    "longitude": -84.5605,
+    "latitude": 9.691,
+    "zoom": 5.2,
+    "pitch": 52,
+    "bearing": -8,
+    "site_count": 5
+  },
+  {
+    "id": "japan",
+    "label": "Japan",
+    "longitude": 139.7415,
+    "latitude": 35.7005,
+    "zoom": 9,
+    "pitch": 52,
+    "bearing": -8,
+    "site_count": 2
+  },
+  {
+    "id": "thailand",
+    "label": "Thailand",
+    "longitude": 100.1465,
+    "latitude": 15.823,
+    "zoom": 2.2,
+    "pitch": 52,
+    "bearing": -8,
+    "site_count": 3
   },
   {
     "id": "united-kingdom",
@@ -526,7 +936,7 @@
     const siteLookup = new Map(pointsOfInterest.map((site) => [site.id, site]));
     const siteFeatureLookup = new Map(sites.features.map((feature) => [feature.properties.id, feature]));
     const countryLookup = new Map(countries.map((country) => [country.id, country]));
-    const siteCenter = [-32.26834900, 34.92718850];
+    const siteCenter = [27.07750000, 30.06768850];
     const siteFlags = new Map();
     const globalView = {
       center: [0, 18],
@@ -700,11 +1110,17 @@
       const title = document.getElementById("site-detail-title");
       const setting = document.getElementById("site-detail-setting");
       const credit = document.getElementById("site-detail-credit");
+      const nights = document.getElementById("site-stat-nights");
+      const images = document.getElementById("site-stat-images");
+      const detections = document.getElementById("site-stat-detections");
       const siteName = feature.properties.site;
 
       detail.classList.remove("is-visible");
 
       window.setTimeout(() => {
+        nights.textContent = formatMetric(feature.properties.number_of_nights);
+        images.textContent = formatMetric(feature.properties.number_of_images);
+        detections.textContent = formatMetric(feature.properties.number_of_detections);
         photo.src = feature.properties.photo_url;
         photo.alt = `${siteName} thumbnail image`;
         title.textContent = siteName;
@@ -717,6 +1133,10 @@
       document.querySelectorAll(".site-button").forEach((button) => {
         button.classList.toggle("is-active", button.dataset.site === feature.properties.id);
       });
+    }
+
+    function formatMetric(value) {
+      return Number(value).toLocaleString();
     }
 
     function buildSiteFlags() {

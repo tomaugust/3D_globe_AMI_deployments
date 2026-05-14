@@ -75,6 +75,9 @@ pushes to `main`.
 | `zoom` | Map zoom level used when flying to the site. |
 | `pitch` | Camera pitch used when flying to the site. |
 | `bearing` | Camera bearing used when flying to the site. |
+| `number_of_nights` | Dummy deployment duration metric for prototyping. |
+| `number_of_images` | Dummy image volume metric for prototyping. |
+| `number_of_detections` | Dummy detection volume metric for prototyping. |
 | `setting` | Short descriptive text shown in the popup and detail panel. |
 | `photo_url` | Image URL shown in the detail panel. |
 | `photo_credit` | Credit line for the image. |

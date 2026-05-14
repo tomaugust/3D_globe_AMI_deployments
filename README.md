@@ -169,6 +169,11 @@ Once Pages has deployed, the site should be available at:
 https://tomaugust.github.io/3D_globe_AMI_deployments/
 ```
 
+If the workflow fails at `Configure Pages` with `Get Pages site failed` or
+`HttpError: Not Found`, the repository has not yet been enabled as a GitHub
+Pages site. Open **Settings > Pages** in the GitHub repository and set the build
+and deployment source to **GitHub Actions**, then re-run the workflow.
+
 ## Implementation Notes
 
 - The browser map uses MapLibre GL JS 5.3.0 from the unpkg CDN.

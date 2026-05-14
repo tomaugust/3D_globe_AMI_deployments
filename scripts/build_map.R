@@ -18,6 +18,12 @@ sites <- read.csv(
   check.names = FALSE
 )
 
+make_id <- function(value) {
+  value <- tolower(value)
+  value <- gsub("[^a-z0-9]+", "-", value)
+  gsub("(^-|-$)", "", value)
+}
+
 sites_sf <- st_as_sf(
   sites,
   coords = c("lon", "lat"),
@@ -52,6 +58,7 @@ site_features <- sites |>
       ),
       properties = list(
         id = id,
+        country = country,
         site = site,
         setting = setting,
         photo_url = photo_url,
@@ -75,6 +82,7 @@ sites_geojson <- toJSON(
 poi_sites_json <- sites |>
   transmute(
     id,
+    country,
     label = site,
     longitude = lon,
     latitude = lat,
@@ -82,6 +90,36 @@ poi_sites_json <- sites |>
     pitch,
     bearing
   ) |>
+  toJSON(
+    dataframe = "rows",
+    auto_unbox = TRUE,
+    pretty = TRUE,
+    digits = 8
+  )
+
+country_views_json <- sites |>
+  group_by(country) |>
+  summarise(
+    site_count = n(),
+    longitude = mean(range(lon)),
+    latitude = mean(range(lat)),
+    lon_span = diff(range(lon)),
+    lat_span = diff(range(lat)),
+    .groups = "drop"
+  ) |>
+  mutate(
+    id = make_id(country),
+    label = country,
+    zoom = case_when(
+      site_count == 1 ~ 10.4,
+      pmax(lon_span, lat_span) < 0.75 ~ 9.0,
+      pmax(lon_span, lat_span) < 5 ~ 5.2,
+      TRUE ~ 2.2
+    ),
+    pitch = if_else(site_count == 1, 45, 52),
+    bearing = if_else(country == "Anguilla", -18, -8)
+  ) |>
+  select(id, label, longitude, latitude, zoom, pitch, bearing, site_count) |>
   toJSON(
     dataframe = "rows",
     auto_unbox = TRUE,
@@ -416,7 +454,7 @@ html <-
   <section class="hud" aria-label="Map controls">
     <p class="eyebrow">Anguilla AMI survey</p>
     <h1>Interactive island sites map</h1>
-    <p>Drag to pan, scroll to zoom, and hold right-click or Ctrl-drag to tilt the view. Click a label or use the site buttons to fly across the island chain.</p>
+    <p>Choose a country to focus the globe, then select a site to fly in closer. Drag to pan, scroll to zoom, and hold right-click or Ctrl-drag to tilt the view.</p>
     <div class="site-list" id="site-list"></div>
     <article class="site-detail" id="site-detail" aria-live="polite">
       <img class="site-detail-photo" id="site-detail-photo" alt="">
@@ -432,8 +470,10 @@ html <-
     const anguilla = __ANGUILLA_GEOJSON__;
     const sites = __SITES_GEOJSON__;
     const pointsOfInterest = __POI_SITES__;
+    const countries = __COUNTRY_VIEWS__;
     const siteLookup = new Map(pointsOfInterest.map((site) => [site.id, site]));
     const siteFeatureLookup = new Map(sites.features.map((feature) => [feature.properties.id, feature]));
+    const countryLookup = new Map(countries.map((country) => [country.id, country]));
     const siteCenter = [__CENTER_LON__, __CENTER_LAT__];
     const siteFlags = new Map();
     const globeSpin = {
@@ -492,7 +532,7 @@ html <-
 
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "top-right");
     map.addControl(new maplibregl.ScaleControl({ maxWidth: 120, unit: "metric" }), "bottom-left");
-    buildSiteButtons();
+    renderCountryButtons();
     buildSiteFlags();
     bindInteractionPause();
 
@@ -619,6 +659,7 @@ html <-
       const name = feature.properties.site;
       const setting = feature.properties.setting;
 
+      renderSiteButtons(feature.properties.country);
       flyToSite(feature.properties.id);
 
       new maplibregl.Popup({ offset: 18, closeButton: false })
@@ -687,19 +728,80 @@ html <-
       });
     }
 
-    function buildSiteButtons() {
-      const list = document.getElementById("site-list");
+    function clearSiteDetail() {
+      const detail = document.getElementById("site-detail");
+      detail.classList.remove("is-visible");
+      siteFlags.forEach(({ element }) => {
+        element.classList.remove("is-visible");
+      });
+    }
 
-      pointsOfInterest.forEach((site) => {
-        const button = document.createElement("button");
-        button.className = "site-button";
-        button.type = "button";
-        button.dataset.site = site.id;
-        button.textContent = site.label;
-        button.addEventListener("click", () => {
+    function createHudButton(label, onClick, options = {}) {
+      const button = document.createElement("button");
+      button.className = "site-button";
+      button.type = "button";
+      button.textContent = label;
+
+      if (options.siteId) {
+        button.dataset.site = options.siteId;
+      }
+
+      if (options.countryId) {
+        button.dataset.country = options.countryId;
+      }
+
+      button.addEventListener("click", onClick);
+      return button;
+    }
+
+    function renderCountryButtons() {
+      const list = document.getElementById("site-list");
+      list.replaceChildren();
+      clearSiteDetail();
+
+      countries.forEach((country) => {
+        const label = `${country.label} (${country.site_count})`;
+        list.appendChild(createHudButton(label, () => {
+          flyToCountry(country.id);
+        }, { countryId: country.id }));
+      });
+    }
+
+    function renderSiteButtons(countryName) {
+      const list = document.getElementById("site-list");
+      list.replaceChildren();
+
+      list.appendChild(createHudButton("All countries", renderCountryButtons));
+
+      pointsOfInterest
+        .filter((site) => site.country === countryName)
+        .forEach((site) => {
+          list.appendChild(createHudButton(site.label, () => {
           flyToSite(site.id);
+        }, { siteId: site.id }));
         });
-        list.appendChild(button);
+    }
+
+    function flyToCountry(countryId) {
+      const country = countryLookup.get(countryId);
+
+      if (!country) {
+        return;
+      }
+
+      globeSpin.enabled = false;
+      globeSpin.flyToInProgress = true;
+      clearSiteDetail();
+      renderSiteButtons(country.label);
+
+      map.flyTo({
+        center: [country.longitude, country.latitude],
+        zoom: country.zoom,
+        pitch: country.pitch,
+        bearing: country.bearing,
+        speed: 0.72,
+        curve: 1.55,
+        essential: true
       });
     }
 
@@ -812,6 +914,7 @@ html <-
 html <- gsub("__ANGUILLA_GEOJSON__", anguilla_geojson, html, fixed = TRUE)
 html <- gsub("__SITES_GEOJSON__", sites_geojson, html, fixed = TRUE)
 html <- gsub("__POI_SITES__", poi_sites_json, html, fixed = TRUE)
+html <- gsub("__COUNTRY_VIEWS__", country_views_json, html, fixed = TRUE)
 html <- gsub("__CENTER_LON__", sprintf("%.8f", center_lon), html, fixed = TRUE)
 html <- gsub("__CENTER_LAT__", sprintf("%.8f", center_lat), html, fixed = TRUE)
 

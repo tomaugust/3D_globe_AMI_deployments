@@ -75,6 +75,7 @@ pushes to `main`.
 | Column | Purpose |
 | --- | --- |
 | `id` | Stable machine-readable site identifier. Keep this unique. |
+| `country` | Country grouping used for the first-level HUD buttons. |
 | `site` | Display name used in buttons, labels, popups, and detail panel. |
 | `lon` | Site longitude in WGS84 decimal degrees. |
 | `lat` | Site latitude in WGS84 decimal degrees. |
@@ -92,11 +93,13 @@ To add or change deployment locations:
 
 1. Edit `data/sites.csv`.
 2. Keep `id` values unique and URL-safe, for example `new-site-name`.
-3. Use decimal longitude and latitude in EPSG:4326 / WGS84.
-4. Adjust `zoom`, `pitch`, and `bearing` so the fly-to camera frames the site
+3. Set `country` to the country-level group that should appear in the first HUD
+   menu, for example `Anguilla` or `United Kingdom`.
+4. Use decimal longitude and latitude in EPSG:4326 / WGS84.
+5. Adjust `zoom`, `pitch`, and `bearing` so the fly-to camera frames the site
    well.
-5. Rebuild `index.html` with the command below.
-6. Open `index.html` locally to check the result before committing.
+6. Rebuild `index.html` with the command below.
+7. Open `index.html` locally to check the result before committing.
 
 ## Rebuilding The Site
 

@@ -324,7 +324,7 @@
   <section class="hud" aria-label="Map controls">
     <p class="eyebrow">Anguilla AMI survey</p>
     <h1>Interactive island sites map</h1>
-    <p>Drag to pan, scroll to zoom, and hold right-click or Ctrl-drag to tilt the view. Click a label or use the site buttons to fly across the island chain.</p>
+    <p>Choose a country to focus the globe, then select a site to fly in closer. Drag to pan, scroll to zoom, and hold right-click or Ctrl-drag to tilt the view.</p>
     <div class="site-list" id="site-list"></div>
     <article class="site-detail" id="site-detail" aria-live="polite">
       <img class="site-detail-photo" id="site-detail-photo" alt="">
@@ -359,6 +359,7 @@
       },
       "properties": {
         "id": "fountain-reserve",
+        "country": "Anguilla",
         "site": "Fountain reserve",
         "setting": "Main island reserve site",
         "photo_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Color_Enhanced_Cavern_DCEN-4.jpg?width=640",
@@ -377,6 +378,7 @@
       },
       "properties": {
         "id": "prickly-pear-cay",
+        "country": "Anguilla",
         "site": "Prickly Pear Cay",
         "setting": "Offshore cay deployment",
         "photo_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Anguilla_Prickly-Pear.jpg?width=640",
@@ -395,6 +397,7 @@
       },
       "properties": {
         "id": "dog-island",
+        "country": "Anguilla",
         "site": "Dog Island",
         "setting": "Remote island deployment",
         "photo_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Dog_Island_Aguilla_Landsat.jpg?width=640",
@@ -413,6 +416,7 @@
       },
       "properties": {
         "id": "sombrero-island",
+        "country": "Anguilla",
         "site": "Sombrero Island",
         "setting": "Northern offshore deployment",
         "photo_url": "https://commons.wikimedia.org/wiki/Special:FilePath/Sombrero_Island,_part_of_Anguilla_-_panoramio.jpg?width=640",
@@ -431,6 +435,7 @@
       },
       "properties": {
         "id": "ukceh-wallingford",
+        "country": "United Kingdom",
         "site": "UKCEH Wallingford",
         "setting": "UKCEH headquarters and project coordination site at the Maclean Building, Crowmarsh Gifford",
         "photo_url": "https://www.ceh.ac.uk/sites/default/files/styles/large/public/2023-02/TILE_Wallingford_hq_entrance_2022_740x548.jpg?itok=kqJEbg4D",
@@ -443,6 +448,7 @@
     const pointsOfInterest = [
   {
     "id": "fountain-reserve",
+    "country": "Anguilla",
     "label": "Fountain reserve",
     "longitude": -63.036,
     "latitude": 18.252,
@@ -452,6 +458,7 @@
   },
   {
     "id": "prickly-pear-cay",
+    "country": "Anguilla",
     "label": "Prickly Pear Cay",
     "longitude": -63.174,
     "latitude": 18.264,
@@ -461,6 +468,7 @@
   },
   {
     "id": "dog-island",
+    "country": "Anguilla",
     "label": "Dog Island",
     "longitude": -63.253,
     "latitude": 18.278,
@@ -470,6 +478,7 @@
   },
   {
     "id": "sombrero-island",
+    "country": "Anguilla",
     "label": "Sombrero Island",
     "longitude": -63.426,
     "latitude": 18.587,
@@ -479,6 +488,7 @@
   },
   {
     "id": "ukceh-wallingford",
+    "country": "United Kingdom",
     "label": "UKCEH Wallingford",
     "longitude": -1.110698,
     "latitude": 51.602377,
@@ -487,8 +497,31 @@
     "bearing": -25
   }
 ];
+    const countries = [
+  {
+    "id": "anguilla",
+    "label": "Anguilla",
+    "longitude": -63.231,
+    "latitude": 18.4195,
+    "zoom": 9,
+    "pitch": 52,
+    "bearing": -18,
+    "site_count": 4
+  },
+  {
+    "id": "united-kingdom",
+    "label": "United Kingdom",
+    "longitude": -1.110698,
+    "latitude": 51.602377,
+    "zoom": 10.4,
+    "pitch": 45,
+    "bearing": -8,
+    "site_count": 1
+  }
+];
     const siteLookup = new Map(pointsOfInterest.map((site) => [site.id, site]));
     const siteFeatureLookup = new Map(sites.features.map((feature) => [feature.properties.id, feature]));
+    const countryLookup = new Map(countries.map((country) => [country.id, country]));
     const siteCenter = [-32.26927070, 34.88163595];
     const siteFlags = new Map();
     const globeSpin = {
@@ -547,7 +580,7 @@
 
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "top-right");
     map.addControl(new maplibregl.ScaleControl({ maxWidth: 120, unit: "metric" }), "bottom-left");
-    buildSiteButtons();
+    renderCountryButtons();
     buildSiteFlags();
     bindInteractionPause();
 
@@ -674,6 +707,7 @@
       const name = feature.properties.site;
       const setting = feature.properties.setting;
 
+      renderSiteButtons(feature.properties.country);
       flyToSite(feature.properties.id);
 
       new maplibregl.Popup({ offset: 18, closeButton: false })
@@ -742,19 +776,80 @@
       });
     }
 
-    function buildSiteButtons() {
-      const list = document.getElementById("site-list");
+    function clearSiteDetail() {
+      const detail = document.getElementById("site-detail");
+      detail.classList.remove("is-visible");
+      siteFlags.forEach(({ element }) => {
+        element.classList.remove("is-visible");
+      });
+    }
 
-      pointsOfInterest.forEach((site) => {
-        const button = document.createElement("button");
-        button.className = "site-button";
-        button.type = "button";
-        button.dataset.site = site.id;
-        button.textContent = site.label;
-        button.addEventListener("click", () => {
+    function createHudButton(label, onClick, options = {}) {
+      const button = document.createElement("button");
+      button.className = "site-button";
+      button.type = "button";
+      button.textContent = label;
+
+      if (options.siteId) {
+        button.dataset.site = options.siteId;
+      }
+
+      if (options.countryId) {
+        button.dataset.country = options.countryId;
+      }
+
+      button.addEventListener("click", onClick);
+      return button;
+    }
+
+    function renderCountryButtons() {
+      const list = document.getElementById("site-list");
+      list.replaceChildren();
+      clearSiteDetail();
+
+      countries.forEach((country) => {
+        const label = `${country.label} (${country.site_count})`;
+        list.appendChild(createHudButton(label, () => {
+          flyToCountry(country.id);
+        }, { countryId: country.id }));
+      });
+    }
+
+    function renderSiteButtons(countryName) {
+      const list = document.getElementById("site-list");
+      list.replaceChildren();
+
+      list.appendChild(createHudButton("All countries", renderCountryButtons));
+
+      pointsOfInterest
+        .filter((site) => site.country === countryName)
+        .forEach((site) => {
+          list.appendChild(createHudButton(site.label, () => {
           flyToSite(site.id);
+        }, { siteId: site.id }));
         });
-        list.appendChild(button);
+    }
+
+    function flyToCountry(countryId) {
+      const country = countryLookup.get(countryId);
+
+      if (!country) {
+        return;
+      }
+
+      globeSpin.enabled = false;
+      globeSpin.flyToInProgress = true;
+      clearSiteDetail();
+      renderSiteButtons(country.label);
+
+      map.flyTo({
+        center: [country.longitude, country.latitude],
+        zoom: country.zoom,
+        pitch: country.pitch,
+        bearing: country.bearing,
+        speed: 0.72,
+        curve: 1.55,
+        essential: true
       });
     }
 

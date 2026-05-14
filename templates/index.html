@@ -1,0 +1,59 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Be Inspired - Insect monitoring around the world</title>
+  <link href="https://unpkg.com/maplibre-gl@5.3.0/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/maplibre-gl@5.3.0/dist/maplibre-gl.js"></script>
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <div id="map"></div>
+  <section class="world-title is-visible" id="world-title" aria-label="Global introduction">
+    <h2>Be Inspired</h2>
+    <p>Explore insect monitoring stations around the world</p>
+  </section>
+  <button class="about-link" id="about-link" type="button">About</button>
+  <div class="about-overlay" id="about-overlay" role="dialog" aria-modal="true" aria-labelledby="about-title">
+    <section class="about-panel">
+      <div class="about-header">
+        <h2 id="about-title">__ABOUT_TITLE__</h2>
+        <button class="about-close" id="about-close" type="button" aria-label="Close about panel">&times;</button>
+      </div>
+      <div class="about-content">
+__ABOUT_CONTENT__
+      </div>
+    </section>
+  </div>
+
+  <section class="hud" aria-label="Map controls">
+    <p class="eyebrow">Explore insect monitoring stations around the world</p>
+    <p>Choose a country to focus the globe, then select a site to fly in closer. Drag to pan, scroll to zoom, and hold right-click or Ctrl-drag to tilt the view.</p>
+    <div class="site-list" id="site-list"></div>
+    <article class="site-detail" id="site-detail" aria-live="polite">
+      <div class="site-stats">
+        <div class="site-stat"><strong id="site-stat-nights"></strong><span>Nights</span></div>
+        <div class="site-stat"><strong id="site-stat-images"></strong><span>Images</span></div>
+        <div class="site-stat"><strong id="site-stat-detections"></strong><span>Detections</span></div>
+      </div>
+      <img class="site-detail-photo" id="site-detail-photo" alt="">
+      <h2 id="site-detail-title"></h2>
+      <p id="site-detail-setting"></p>
+      <a class="site-detail-credit" id="site-detail-credit" href="#" target="_blank" rel="noopener"></a>
+    </article>
+  </section>
+
+  <script>
+  window.AMI_GLOBE_DATA = {
+    sites: __SITES_GEOJSON__,
+    pointsOfInterest: __POI_SITES__,
+    countries: __COUNTRY_VIEWS__,
+    siteCenter: [__CENTER_LON__, __CENTER_LAT__]
+  };
+</script>
+  <script src="assets/app.js" defer></script>
+</body>
+</html>
+

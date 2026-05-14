@@ -1,0 +1,31 @@
+{
+  "title": "About INSPIRE",
+  "paragraphs": [
+    "INSPIRE explores how new technology and citizen science can help people understand and protect insects around the world. Insects pollinate crops, recycle nutrients, feed wildlife, and give early warnings about environmental change, but we still know far too little about how many insect populations are changing.",
+    "The project brings together AI-assisted camera systems for nocturnal insects with inclusive ways for people to contribute observations. By combining automated monitoring with community science, INSPIRE aims to create better evidence for conservation while helping more people connect with nature.",
+    "This globe highlights monitoring stations and partner locations in an emerging international network. The ambition is to support local and global biodiversity assessments, share open data, and make insect monitoring more visible, accessible, and useful. INSPIRE is supported by the Aberdeen Charitable Foundation."
+  ],
+  "link_heading": "Find Out More",
+  "links": [
+    {
+      "title": "UKCEH",
+      "subtitle": "UK Centre for Ecology & Hydrology",
+      "url": "https://www.ceh.ac.uk/"
+    },
+    {
+      "title": "Aberdeen Charitable Foundation",
+      "subtitle": "Project funder and partner",
+      "url": "https://www.aberdeenplc.com/en-gb/news-and-insights/a-new-partnership-to-protect-insect-populations"
+    },
+    {
+      "title": "UK PoMS",
+      "subtitle": "UK Pollinator Monitoring Scheme",
+      "url": "https://ukpoms.org.uk/"
+    },
+    {
+      "title": "Butterfly Monitoring",
+      "subtitle": "International butterfly monitoring networks",
+      "url": "https://butterfly-monitoring.net/"
+    }
+  ]
+}

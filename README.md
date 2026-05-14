@@ -2,13 +2,16 @@
 
 A static, interactive 3D globe for exploring insect monitoring stations around
 the world. The visualisation is designed for GitHub Pages and is built as a
-single generated `index.html` file.
+generated `index.html` page with local CSS and JavaScript assets.
 
 The editable source of truth is:
 
 - `data/sites.csv` for site records, map positions, metrics, and image paths
+- `data/about.json` for About modal copy and links
 - `data/images/` for local site photographs and gallery images
-- `scripts/build_map.R` for the HTML, CSS, JavaScript, and embedded data build
+- `templates/index.html` for page structure
+- `assets/styles.css` and `assets/app.js` for browser styling and behaviour
+- `scripts/build_map.R` for validation, generated map data, and template rendering
 
 ## User Experience
 
@@ -44,7 +47,11 @@ The current site data includes monitoring stations grouped under:
 .
 |-- index.html
 |-- README.md
+|-- assets/
+|   |-- app.js
+|   `-- styles.css
 |-- data/
+|   |-- about.json
 |   |-- sites.csv
 |   `-- images/
 |       `-- <country-slug>/
@@ -56,8 +63,9 @@ The current site data includes monitoring stations grouped under:
 |                   |-- moth-03.png
 |                   `-- captions.csv
 |-- scripts/
-|   |-- build_map.R
-|   `-- localise_site_images.R
+|   `-- build_map.R
+|-- templates/
+|   `-- index.html
 `-- .github/
     `-- workflows/
         `-- pages.yml
@@ -68,25 +76,36 @@ The current site data includes monitoring stations grouped under:
 `index.html`
 
 The generated static site served by GitHub Pages. It includes the page markup,
-styles, MapLibre setup, embedded GeoJSON/site data, and all browser-side
-interaction code. Do not edit this by hand for durable changes; regenerate it
-from `scripts/build_map.R`.
+embedded GeoJSON/site data, and links to the local CSS and JavaScript assets.
+Do not edit this by hand for durable changes; regenerate it from
+`scripts/build_map.R`.
 
 `scripts/build_map.R`
 
-Builds the site. It reads `data/sites.csv`, discovers each site's gallery image
-paths, creates the GeoJSON and country camera data, injects everything into the
-HTML template, and writes `index.html`.
+Builds the site. It validates site IDs and local asset paths, reads
+`data/sites.csv` and `data/about.json`, discovers each site's gallery image
+paths and captions, creates the GeoJSON and country camera data, injects
+everything into the HTML template, and writes `index.html`.
 
-`scripts/localise_site_images.R`
+`templates/index.html`
 
-Utility for converting remote `photo_url` values in `data/sites.csv` into local
-image files. It downloads each image into `data/images/<country>/<site>/` and
-updates `photo_url` to point at the local path.
+Editable page structure with placeholders for generated data and About content.
+
+`assets/styles.css`
+
+Editable site styles loaded by `index.html`.
+
+`assets/app.js`
+
+Editable browser-side MapLibre and UI interaction code loaded by `index.html`.
 
 `data/sites.csv`
 
 The editable site table. Each row represents one monitoring station.
+
+`data/about.json`
+
+Editable About modal title, body copy, and link cards.
 
 `data/images/`
 
@@ -174,7 +193,7 @@ To edit an existing site:
    folder if needed.
 3. Run the build script.
 4. Preview `index.html`.
-5. Commit `data/`, `scripts/`, and the regenerated `index.html` together.
+5. Commit the source data/assets and the regenerated `index.html` together.
 
 To add a new site:
 
@@ -212,6 +231,10 @@ Install missing packages in R:
 ```r
 install.packages(c("sf", "dplyr", "jsonlite"))
 ```
+
+The build fails early if site IDs are duplicated, primary photos are missing,
+gallery captions do not match gallery image files, or gallery caption files have
+the wrong schema.
 
 ## Local Preview
 
@@ -270,6 +293,7 @@ Runtime assets loaded from CDNs or external services:
 
 Runtime assets loaded locally from the repository:
 
+- CSS and JavaScript under `assets/`
 - site detail photographs under `data/images/`
 - gallery carousel images under each site's `gallery/` folder
 - embedded site and country data generated into `index.html`
@@ -277,7 +301,8 @@ Runtime assets loaded locally from the repository:
 ## Maintenance Notes
 
 `index.html` is generated output. Durable changes should be made in
-`scripts/build_map.R`, `data/sites.csv`, or `data/images/`, then rebuilt.
+`templates/`, `assets/`, `scripts/build_map.R`, `data/sites.csv`,
+`data/about.json`, or `data/images/`, then rebuilt.
 
 Before pushing:
 
